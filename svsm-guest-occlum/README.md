@@ -37,7 +37,7 @@ Besides, the Guest OS kernel Module can also interact with SEH without receiving
 ```
 make && insmod svsm_guest.ko
 ```
-The Kernel Module depends on the normal behavior of the Trampoline pages (code page and data page), but sometimes the Kernel Module might fail to successfully set up the trampoline. When you `insmod` the kernel module and get some log like below, that means the trampoline has been successfully set up. Therefore the Kernel Module can operate normally.
+The Kernel Module depends on the normal behavior of the Trampoline pages (code page and data page), but sometimes the Kernel Module might fail to successfully set up the trampoline. When you `insmod` the kernel module and get some log like below (i.e. code page trampoline PTE Value: 8xxxxxxxxxxxx, data trampoline PTE Value: 8008000xxxxxxxxx), that means the trampoline has been successfully set up. Therefore the Kernel Module can operate normally.
 ```
 [   48.415430] VS_GUEST: print_page_table_entry: 32. VS_ERROR. belonging of pagetable walk: insmod
 [   48.415882] VS_GUEST: print_page_table_entry: 63. VS_ERROR. Page table entry at virtual address ffff9683d7dd8000:
@@ -57,5 +57,7 @@ The Kernel Module depends on the normal behavior of the Trampoline pages (code p
 [   48.424750] VS_GUEST: print_page_table_entry: 64. VS_ERROR.   PTE Value: 8008000110235163
 [   48.425309] VS_GUEST: judge: 16. VS_ERROR. data page trampoline succeed.
 ```
-If you don't see the `succeed` log, you should `rmmod` the kernel module and re-insmod the kernel module until you see `succeed` log in data & code pages alike. Sometimes you might be unlucky and might have to `reboot` the guest OS and do the above things.
+If you don't see the right value of the data and code trampoline page PTE, you should `rmmod` the kernel module and re-insmod the kernel module until you see right values. 
+
+Sometimes you might be unlucky and might have to `reboot` the guest OS and do the above things, but once you've successfully insmod the Guest Module, things will go smoothly.
 
