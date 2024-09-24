@@ -1,0 +1,35 @@
+[package]
+name = "grpc_examples_route_guide"
+version = "0.0.0"
+authors = ["Stepan Koltsov <stepan.koltsov@gmail.com>"]
+publish = false
+edition = "2018"
+
+[lib]
+doctest = false
+test = false
+
+[dependencies.grpc]
+path = "../../grpc"
+[dependencies.grpc-protobuf]
+path = "../../grpc-protobuf"
+
+[dependencies]
+protobuf        = "~2.18.2"
+futures         = "0.3.*"
+tls-api            = "0.4.*"
+tls-api-native-tls = "0.4.*"
+env_logger      = "0.4.*"
+rand            = "0.5.5"
+json            = "0.11.*"
+
+[build-dependencies]
+protoc-rust-grpc = { path = "../../protoc-rust-grpc" }
+
+[[bin]]
+name = "route_guide_client"
+test = false
+
+[[bin]]
+name = "route_guide_server"
+test = false

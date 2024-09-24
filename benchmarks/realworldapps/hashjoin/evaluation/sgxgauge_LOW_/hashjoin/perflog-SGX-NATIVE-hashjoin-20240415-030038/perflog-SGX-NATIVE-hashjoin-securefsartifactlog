@@ -1,0 +1,9 @@
+WARNING: perf not found for kernel 6.5.0-snp
+
+  You may need to install the following packages for this specific kernel:
+    linux-tools-6.5.0-snp-guest-525dfdeadc3a
+    linux-cloud-tools-6.5.0-snp-guest-525dfdeadc3a
+
+  You may also want to install one of the following packages to keep up to date:
+    linux-tools-guest-525dfdeadc3a
+    linux-cloud-tools-guest-525dfdeadc3a

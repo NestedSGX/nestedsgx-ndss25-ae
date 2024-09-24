@@ -1,0 +1,3 @@
+git clone https://github.com/wolfSSL/wolfssl-examples.git
+wget https://github.com/wolfSSL/wolfssl/archive/refs/tags/v5.7.0-stable.tar.gz
+tar -zxvf v5.7.0-stable.tar.gz

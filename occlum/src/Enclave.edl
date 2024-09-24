@@ -1,0 +1,314 @@
+enclave {
+    from "sgx_backtrace.edl" import *;
+    from "sgx_stdio.edl" import *;
+    from "sgx_tstdc.edl" import *;
+    from "sgx_tstd.edl" import *;
+    from "sgx_tprotected_fs.edl" import *;
+    from "sgx_net.edl" import *;
+    from "sgx_occlum_utils.edl" import *;
+
+    include "sgx_quote.h"
+    include "occlum_edl_types.h"
+
+    include "sgx_ql_quote.h"
+    include "sgx_qve_header.h"
+
+    // for deep copy of the inside contents
+    struct sgx_ql_qve_collateral {
+        uint32_t version;
+        [size=pck_crl_issuer_chain_size] char *pck_crl_issuer_chain;
+        uint32_t pck_crl_issuer_chain_size;
+        [size=root_ca_crl_size] char *root_ca_crl;
+        uint32_t root_ca_crl_size;
+        [size=pck_crl_size] char *pck_crl;
+        uint32_t pck_crl_size;
+        [size=tcb_info_issuer_chain_size] char *tcb_info_issuer_chain;
+        uint32_t tcb_info_issuer_chain_size;
+        [size=tcb_info_size] char *tcb_info;
+        uint32_t tcb_info_size;
+        [size=qe_identity_issuer_chain_size] char *qe_identity_issuer_chain;
+        uint32_t qe_identity_issuer_chain_size;
+        [size=qe_identity_size] char *qe_identity;
+        uint32_t qe_identity_size;
+    };
+
+    struct host_file_buffer {
+        [size=resolv_conf_buf_size]char *resolv_conf_buf;
+        uint32_t resolv_conf_buf_size;
+        [size=hosts_buf_size]char *hosts_buf;
+        uint32_t hosts_buf_size;
+        [size=hostname_buf_size]char *hostname_buf;
+        uint32_t hostname_buf_size;
+    };
+
+    trusted {
+        /*
+         * Initialize the LibOS according to the specified attributes.
+         *
+         * @retval On success, return 0; otherwise, return -errno.
+         *
+         * The possible values of errno are
+         *      EEXIST - The LibOS has already been initialized.
+         *      EINVAL - The value of an argument are invalid.
+         */
+
+        public int occlum_ecall_init(
+            [in, string] const char* log_level, 
+            [in, string] const char* instance_dir, 
+            [in] const struct host_file_buffer* file_buffer);
+        
+        /*
+         * Create a new LibOS process to do the task specified by the given 
+         * arguments.
+         *
+         * @retval On success, return the thread ID of the 
+         * newly-created process (pid == tid for a new process). On error, 
+         * return -errno.
+         *
+         * The possible values of errno are
+         *      EAGAIN - The LibOS is not initialized.
+         *      EINVAL - The value of an argument are invalid.
+         *      ENOMEM - Not enough memory to create the new process.
+         *      EACCES - The path of the executable is not accessible.
+         */
+        public int occlum_ecall_new_process(
+            [in, string] const char* executable_path,
+            [user_check] const char** argv,
+            [user_check] const char** env,
+            [in] const struct occlum_stdio_fds* io_fds);
+
+        /*
+         * Execute the LibOS thread specified by the TID.
+         *
+         * This API is synchronous: it returns until the LibOS thread 
+         * terminates.
+         *
+         * @retval On success, return the exit status of the thread, whose 
+         * value is always greater than or equal to zero. To unify the two 
+         * cases of terminating normally and being killed by a signal, the
+         * exit status is encoded in the way described in wait(2) man page.
+         * This means if the thread exits normally (e.g., returning from the
+         * main page or call exit(2) explictly), then the exit status is 
+         * can be gained by WEXITSTATUS(status). If the thread is killed by a
+         * signal, then the signal number is WTERMSIG(status).
+         *
+         * The possible values of errno are
+         *      EAGAIN - The LibOS is not initialized.
+         *      EINVAL - The value of an argument are invalid.
+         *      ESRCH - Cannot find the LibOS thread.
+         */
+        public int occlum_ecall_exec_thread(int libos_tid, int host_tid);
+
+        /*
+         * Send a signal to one or multiple LibOS processes.
+         *
+         * If pid == -1, send the signal to all processes. If pid > 0, send
+         * the signal to the specific process. For the purpose of security,
+         * the only allowed signals for now are SIGKILL and SIGTERM.
+         *
+         * @retval On success, return 0. On error, return -errno.
+         *
+         * The possible values of errno are
+         *      EAGAIN - The LibOS is not initialized.
+         *      EINVAL - The value of an argument are invalid.
+         *      ESRCH - Cannot find the process specified by pid.
+         *      EPERM - No permission to send the signal or to the process.
+         */
+        public int occlum_ecall_kill(int pid, int sig);
+
+        /*
+         * Broadcast interrupts to LibOS threads.
+         *
+         * Interrupts are sent to whichever LibOS threads that have pending
+         * events (e.g., signals). By interrupting the execution of these 
+         * threads, the LibOS is given a chance to handle these events despite
+         * of the specific user workloads.
+         *
+         * @retval On success, return a non-negative value, which is the number
+         * of LibOS threads to which interrupts are sent. On error, return 
+         * -errno.
+         *
+         * The possible values of errno are
+         *      EAGAIN - The LibOS is not initialized.
+         */
+        public int occlum_ecall_broadcast_interrupts(void);
+    };
+
+    untrusted {
+        /*
+         * Execute the LibOS thread specified by a TID in a new host OS thread.
+         *
+         * This API is asynchronous: it immediately returns after successfully 
+         * creating a new host OS thread that will enter the enclave and execute the
+         * the LibOS thread (using occlum_ecall_exec_process).
+         *
+         * @retval On success, return 0. On error, return -1.
+         */
+        int occlum_ocall_exec_thread_async(int libos_tid);
+
+        int occlum_ocall_thread_getcpuclock([out] struct timespec* ts) propagate_errno;
+
+        void occlum_ocall_gettimeofday([out] struct timeval* tv);
+        void occlum_ocall_clock_gettime(clockid_t clockid, [out] struct timespec* ts);
+        void occlum_ocall_clock_getres(clockid_t clockid, [out] struct timespec* res);
+        void occlum_ocall_rdtsc([out] uint32_t* low, [out] uint32_t* high);
+        void occlum_ocall_get_timerslack([out] int *timer_slack);
+
+        int occlum_ocall_clock_nanosleep(
+            clockid_t clockid, int flags,
+            [in] const struct timespec* req,
+            [out] struct timespec* rem
+        ) propagate_errno;
+
+        int occlum_ocall_timerfd_create(clockid_t clockid, int flags) propagate_errno;
+        int occlum_ocall_timerfd_settime(int fd, int flags, [in] const struct itimerspec* new_value, [out] struct itimerspec* old_value) propagate_errno;
+        int occlum_ocall_timerfd_gettime(int fd, [out] struct itimerspec* curr_value) propagate_errno;
+
+        void occlum_ocall_sync(void);
+
+        int occlum_ocall_statfs([in, string] const char* path, [out] struct statfs* buf) propagate_errno;
+
+        void* occlum_ocall_posix_memalign(size_t alignment, size_t size);
+        void occlum_ocall_free([user_check] void* ptr);
+
+        int occlum_ocall_mprotect([user_check] void* addr, size_t len, int prot);
+
+        int occlum_ocall_pkey_alloc(unsigned int flags, unsigned int access_rights);
+        int occlum_ocall_pkey_mprotect([user_check] void* addr, size_t len, int prot, int pkey);
+        int occlum_ocall_pkey_free(int pkey);
+
+        int occlum_ocall_get_numa_topology(
+            [out, count=ncpus] uint32_t *numa_buf,
+            size_t ncpus
+        ) propagate_errno;
+        void occlum_ocall_sched_yield(void);
+        int occlum_ocall_sched_setaffinity(
+            int host_tid,
+            size_t cpusize,
+            [in, size=cpusize] const unsigned char* buf
+        ) propagate_errno;
+        int occlum_ocall_sched_getaffinity(
+            size_t cpusize,
+            [out, size=cpusize] unsigned char* buf
+        ) propagate_errno;
+        int occlum_ocall_ncores(void);
+
+        sgx_status_t occlum_ocall_sgx_init_quote(
+            [out] sgx_target_info_t* target_info,
+            [out] sgx_epid_group_id_t* epid_group_id);
+        sgx_status_t occlum_ocall_sgx_get_epid_quote(
+            [in, size=sigrl_len] uint8_t* sigrl,
+            uint32_t sigrl_len,
+            [in] sgx_report_t* report,
+            sgx_quote_sign_type_t quote_type,
+            [in] sgx_spid_t* spid,
+            [in] sgx_quote_nonce_t* nonce,
+            [out] sgx_report_t* qe_report,
+            [out, size=quote_buf_len] sgx_quote_t* quote_buf,
+            uint32_t quote_buf_len);
+
+        int occlum_ocall_detect_dcap_driver() propagate_errno;
+        quote3_error_t occlum_ocall_init_dcap_quote_generator(
+            [out] sgx_target_info_t* qe_target_info,
+            [out] uint32_t* quote_size
+        ) propagate_errno;
+        quote3_error_t occlum_ocall_generate_dcap_quote(
+            [in] sgx_report_t* app_report,
+            uint32_t quote_size,
+            [out, size=quote_size] uint8_t* quote_buf
+        ) propagate_errno;
+        uint32_t occlum_ocall_get_supplement_size() propagate_errno;
+        quote3_error_t occlum_ocall_verify_dcap_quote(
+            [in, size=quote_size] uint8_t* quote_buf,
+            uint32_t quote_size,
+            [in] struct sgx_ql_qve_collateral* quote_collateral,
+            time_t expiration_check_date,
+            [out] uint32_t* collateral_expiration_status,
+            [out] sgx_ql_qv_result_t* quote_verification_result,
+            [in, out] sgx_ql_qe_report_info_t* qve_report_info,
+            uint32_t supplemental_data_size,
+            [out, size=supplemental_data_size] uint8_t* supplemental_data
+        ) propagate_errno;
+
+        int64_t occlum_ocall_sendmsg(
+            int sockfd,
+            [in, size=msg_namelen] const void* msg_name,
+            socklen_t msg_namelen,
+            [in, count=msg_iovlen] const struct iovec* msg_iov,
+            size_t msg_iovlen,
+            [in, size=msg_controllen] const void* msg_control,
+            size_t msg_controllen,
+            int flags
+        ) propagate_errno;
+        int64_t occlum_ocall_recvmsg(
+            int sockfd,
+            [out, size=msg_namelen] void *msg_name,
+            socklen_t msg_namelen,
+            [out] socklen_t* msg_namelen_recv,
+            [in, count=msg_iovlen] struct iovec* msg_iov,
+            size_t msg_iovlen,
+            [out, size=msg_controllen] void *msg_control,
+            size_t msg_controllen,
+            [out] size_t* msg_controllen_recv,
+            [out] int* msg_flags_recv,
+            int flags
+        ) propagate_errno;
+
+        int occlum_ocall_eventfd(
+            unsigned int initval,
+            int flags
+        ) propagate_errno;
+        // TODO: the usage of this OCall should be replaced with 
+        // occlum_ocall_poll_with_eventfd, which is a more general form.
+        int occlum_ocall_eventfd_poll(
+            int eventfd,
+            [in, out] struct timespec *timeout
+        ) propagate_errno;
+        void occlum_ocall_eventfd_write_batch(
+            [in, count=num_fds] int* eventfds,
+            size_t num_fds,
+            uint64_t val
+        );
+
+        // TODO: the usage of this OCall should be replaced with 
+        // occlum_ocall_poll_with_eventfd, which is a more general form.
+        int occlum_ocall_poll(
+            [in, out, count=nfds] struct pollfd *fds,
+            nfds_t nfds,
+            [in, out] struct timeval *timeout,
+            int efd
+        ) propagate_errno;
+        int occlum_ocall_poll_with_eventfd(
+            [in, out, count=nfds] struct pollfd *fds,
+            nfds_t nfds,
+            [in, out] struct timespec *timeout,
+            int eventfd_idx
+        ) propagate_errno;
+
+        void occlum_ocall_print_log(uint32_t level, [in, string] const char* msg);
+        void occlum_ocall_flush_log(void);
+
+        int occlum_ocall_ioctl_repack(
+            int fd,
+            int request,
+            [in, out, size=len] char *buf,
+            int len,
+            [out] int* recv_len
+        ) propagate_errno;
+
+        int occlum_ocall_ioctl(
+            int fd,
+            int request,
+            [in, out, size=len] void *arg,
+            size_t len
+        ) propagate_errno;
+
+        int occlum_ocall_tkill(int tid, int signum) propagate_errno;
+
+        sgx_status_t occlum_ocall_sgx_calc_quote_size (
+           [in, size=sig_rl_size] uint8_t * p_sig_rl,
+           uint32_t sig_rl_size,
+           [out] uint32_t* p_quote_size
+        );
+    };
+};

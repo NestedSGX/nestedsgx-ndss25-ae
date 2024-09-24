@@ -1,0 +1,10 @@
+prefix=/home/link/occlum/linux-sgx/linux/installer/bin/sgxsdk
+includedir=${prefix}/include
+libdir=${prefix}/lib64
+
+Name: libsgx_launch
+Description: SGX launch library
+Version: 2.20.100.4
+Cflags: -I${includedir}
+Libs: -L${libdir} -lsgx_launch
+Libs.private: -lsgx_launch

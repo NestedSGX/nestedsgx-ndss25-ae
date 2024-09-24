@@ -1,0 +1,21 @@
+[package]
+name = "rcore-fs-ucore"
+version = "0.1.0"
+authors = ["WangRunji <wangrunji0408@163.com>"]
+edition = "2021"
+
+[lib]
+crate-type = ["staticlib"]
+
+[profile.dev]
+panic = 'abort' # prevent `_Unwind_Resume` link error
+
+[dependencies]
+bitflags = "1.0"
+static_assertions = "0.3"
+rcore-fs = { path = "../rcore-fs" }
+spin = "0.4"
+lazy_static = { version = "1.2", features = ["spin_no_std"] }
+
+[features]
+debug_print = []

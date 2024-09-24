@@ -1,0 +1,33 @@
+[package]
+name = "long_tests"
+version = "0.0.0"
+authors = ["Stepan Koltsov <stepan.koltsov@gmail.com>"]
+publish = false
+edition = "2018"
+
+[lib]
+test = false
+doctest = false
+
+[dependencies.grpc]
+path = "../../grpc"
+[dependencies.grpc-protobuf]
+path = "../../grpc-protobuf"
+
+[dependencies]
+log             = "0.4.*"
+env_logger      = "~0.5"
+protobuf        = "~2.18.2"
+tls-api         = "0.4.*"
+futures         = "0.3.*"
+
+[build-dependencies]
+protoc-rust-grpc = { path = "../../protoc-rust-grpc" }
+
+[[bin]]
+name = "long_tests_server"
+test = false
+
+[[bin]]
+name = "long_tests_client"
+test = false

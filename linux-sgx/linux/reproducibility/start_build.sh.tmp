@@ -1,0 +1,188 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2011-2021 Intel Corporation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#   * Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#   * Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in
+#     the documentation and/or other materials provided with the
+#     distribution.
+#   * Neither the name of Intel Corporation nor the names of its
+#     contributors may be used to endorse or promote products derived
+#     from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+
+# The script should be executed in the container with NIX environment.
+# It automates the reproducible build in container.
+
+set -e
+
+script_dir="$( cd "$( dirname "$0" )" >> /dev/null 2>&1 && pwd )"
+sgx_repo="$script_dir/sgx"
+build_out="$script_dir/out"
+
+sdk_prefix="/linux-sgx/"
+sdk_install_path="/linux-sgx/sgxsdk"
+
+toolset_dir=""
+sdk_installer=""
+
+
+clean_repo()
+{
+    pushd .
+    if [ -f $sgx_repo/external/ippcp_internal/Makefile ]; then
+        cd $sgx_repo/external/ippcp_internal/ && make clean
+    fi
+    if [ -f $sgx_repo/Makefile ]; then
+        cd $sgx_repo/ && make clean
+    fi
+    # uninstall SDK installer
+    if [ -x "$sdk_install_path/uninstall.sh" ]; then
+        $sdk_install_path/uninstall.sh
+    fi
+    #rm -rf $build_out
+    popd
+}
+
+build_ipp()
+{
+    local ipp_out="$build_out/ipp"
+    pushd .
+    cd $sgx_repo/external/ippcp_internal/
+    make clean; make
+    make clean; make MITIGATION-CVE-2020-0551=LOAD
+    make clean; make MITIGATION-CVE-2020-0551=CF
+    mkdir -p "$ipp_out"
+    cp -r $sgx_repo/external/ippcp_internal/lib/linux/intel64/* "$ipp_out"
+    popd
+}
+
+build_sdk()
+{
+    local sdk_out="$build_out/sdk"
+    pushd .
+    cd $sgx_repo; make sdk_install_pkg
+    local installer=$(find $sgx_repo/linux/installer/bin -name "sgx_linux_x64_sdk*.bin")
+    if [ ! -d "$sdk_out" ]; then
+        mkdir -p $sdk_out
+    fi
+    cp $installer $sdk_out
+    cp -r $sgx_repo/build/* $sdk_out
+    popd
+    sdk_installer="$installer"
+}
+
+build_ae()
+{
+    # Requires two input args:
+    #   $1: sdk installer path
+    if [ $# != 1 ]; then
+        echo "Invalid input parameter"
+        exit 1
+    fi
+
+    local sdk_installer="$1"
+    if [ ! -f "$sdk_installer" ]; then
+        echo "SDK installer is not found. $sdk_installer"
+        exit 1
+    fi
+    # Install sdk installer and source environment
+    $sdk_installer --prefix=$sdk_prefix
+    source $sdk_install_path/environment
+
+    pushd .
+    local ae_out="$build_out/ae"
+    mkdir -p $ae_out
+    cd $sgx_repo/psw/ae/le && make
+    cp le.so $ae_out
+    cd $sgx_repo/psw/ae/pce && make
+    cp pce.so $ae_out
+    cd $sgx_repo/psw/ae/pve && make
+    cp pve.so $ae_out
+    cd $sgx_repo/psw/ae/qe && make
+    cp qe.so $ae_out
+    cd $sgx_repo/external/dcap_source/QuoteGeneration/quote_wrapper/quote/enclave/linux && make
+    cp qe3.so $ae_out
+    cd $sgx_repo/external/dcap_source/QuoteGeneration/quote_wrapper/quote/id_enclave/linux && make
+    cp id_enclave.so $ae_out
+    cd $sgx_repo/external/dcap_source/QuoteGeneration/quote_wrapper/tdx_quote/enclave/linux && make
+    cp tdqe.so $ae_out
+    cd $sgx_repo/external/dcap_source/QuoteVerification/QvE && make
+    cp qve.so $ae_out
+    popd
+}
+
+usage()
+{
+    echo "
+    Usage:
+        $0 TYPE
+
+    Description:
+        Automate the reproducible build in the container. The reproducibility TYPE
+        should be provied and could be one of [ all | sdk | ae | ipp ]
+    "
+}
+
+###########################################################################
+###########################################################################
+type="$1"
+if [ "$type" = "" ]; then
+    echo "Invalid input parameter. Please input the reproducibility type.
+          Possible options: [ all | sdk | ae | ipp ]"
+    exit 1
+elif [ ! -d "$sgx_repo" ]; then
+    echo "No sgx source code."
+    exit 1
+fi
+
+clean_repo
+
+case "$type" in
+    "all")
+        build_ipp
+        build_sdk
+        build_ae $sdk_installer
+        echo "All the targets are built out and could be found under $build_out"
+        ;;
+    "ae")
+        sdk_installer=$(ls $script_dir/sgx_linux_x64_sdk_*.bin)
+        build_ae $sdk_installer
+        echo "The built out AEs could be found under $build_out/ae"
+        ;;
+    "sdk")
+        build_sdk
+        echo "SGX SDK installer has been built out. $sdk_installer"
+        ;;
+    "ipp")
+        build_ipp
+        echo "The built out IPP crypto libs could be found under $build_out/ipp"
+        ;;
+    *)
+        echo "Unsupported type."
+        usage
+        exit 1
+esac
+
+exit 0
+
+

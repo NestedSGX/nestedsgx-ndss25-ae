@@ -1,0 +1,10 @@
+LIBRARY	"sgx_tdx_logic"
+
+EXPORTS
+    tee_att_create_context     @1
+    tee_att_free_context       @2
+    tee_att_init_quote         @3
+    tee_att_get_quote_size     @4
+    tee_att_get_quote          @5
+    tee_att_get_keyid          @6
+    tee_att_get_platform_info  @7

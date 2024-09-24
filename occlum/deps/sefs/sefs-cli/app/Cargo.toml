@@ -1,0 +1,20 @@
+[package]
+name = "sefs-cli"
+version = "1.0.0"
+authors = ["Antfin"]
+build = "build.rs"
+edition = "2021"
+
+[dependencies]
+sgx_types = { path = "../../../rust-sgx-sdk/sgx_types" }
+sgx_urts = { path = "../../../rust-sgx-sdk/sgx_urts" }
+dirs = "1.0.2"
+fuse = "0.3"
+libc = "0.2"
+ctrlc = "=3.1.6"
+structopt = "0.3"
+env_logger = "0.7"
+rcore-fs-cli = { path = "../../rcore-fs-cli", features = ["use_fuse"] }
+rcore-fs-sefs = { path = "../../rcore-fs-sefs", features = ["create_image"] }
+rcore-fs-unionfs = { path = "../../rcore-fs-unionfs" }
+rcore-fs = { path = "../../rcore-fs", features = ["std"] }

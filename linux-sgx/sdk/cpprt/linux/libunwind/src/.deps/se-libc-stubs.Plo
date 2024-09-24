@@ -1,0 +1,149 @@
+se-libc-stubs.lo: se-libc-stubs.c \
+ ../../../../../common/inc/internal/arch.h \
+ ../../../../../common/inc/internal/inst.h \
+ ../../../../../common/inc/internal/se_types.h \
+ ../../../../../common/inc/internal/se_cdefs.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stdint.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stdint-gcc.h \
+ /usr/include/unistd.h /usr/include/features.h /usr/include/stdc-predef.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/bits/long-double.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
+ /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h \
+ /usr/include/x86_64-linux-gnu/bits/confname.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd.h \
+ /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+ ../../../../../common/inc/sgx_attributes.h \
+ ../../../../../common/inc/sgx_key.h \
+ ../../../../../common/inc/sgx_attributes.h \
+ ../../../../../common/inc/sgx_report.h \
+ ../../../../../common/inc/sgx_key.h \
+ ../../../../../common/inc/sgx_report2.h \
+ ../../../../../common/inc/sgx_tcrypto.h ../../../../../common/inc/sgx.h \
+ ../../../../../common/inc/sgx_error.h \
+ ../../../../../common/inc/sgx_report.h \
+ ../../../../../common/inc/sgx_defs.h /usr/include/stdlib.h \
+ /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
+ /usr/include/x86_64-linux-gnu/bits/stdlib.h \
+ ../../../../../common/inc/sgx_trts.h \
+ ../../../../../common/inc/sgx_mode.h /usr/include/assert.h \
+ /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/string_fortified.h \
+ /usr/include/x86_64-linux-gnu/sys/mman.h \
+ /usr/include/x86_64-linux-gnu/bits/mman.h \
+ /usr/include/x86_64-linux-gnu/bits/mman-map-flags-generic.h \
+ /usr/include/x86_64-linux-gnu/bits/mman-linux.h \
+ /usr/include/x86_64-linux-gnu/bits/mman-shared.h
+
+../../../../../common/inc/internal/arch.h:
+
+../../../../../common/inc/internal/inst.h:
+
+../../../../../common/inc/internal/se_types.h:
+
+../../../../../common/inc/internal/se_cdefs.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/9/include/stdint.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/9/include/stdint-gcc.h:
+
+/usr/include/unistd.h:
+
+/usr/include/features.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
+
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
+
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+
+/usr/include/x86_64-linux-gnu/bits/time64.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h:
+
+/usr/include/x86_64-linux-gnu/bits/confname.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd.h:
+
+/usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
+
+../../../../../common/inc/sgx_attributes.h:
+
+../../../../../common/inc/sgx_key.h:
+
+../../../../../common/inc/sgx_attributes.h:
+
+../../../../../common/inc/sgx_report.h:
+
+../../../../../common/inc/sgx_key.h:
+
+../../../../../common/inc/sgx_report2.h:
+
+../../../../../common/inc/sgx_tcrypto.h:
+
+../../../../../common/inc/sgx.h:
+
+../../../../../common/inc/sgx_error.h:
+
+../../../../../common/inc/sgx_report.h:
+
+../../../../../common/inc/sgx_defs.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
+
+/usr/include/x86_64-linux-gnu/bits/floatn.h:
+
+/usr/include/x86_64-linux-gnu/bits/floatn-common.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-bsearch.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib.h:
+
+../../../../../common/inc/sgx_trts.h:
+
+../../../../../common/inc/sgx_mode.h:
+
+/usr/include/assert.h:
+
+/usr/include/string.h:
+
+/usr/include/x86_64-linux-gnu/bits/string_fortified.h:
+
+/usr/include/x86_64-linux-gnu/sys/mman.h:
+
+/usr/include/x86_64-linux-gnu/bits/mman.h:
+
+/usr/include/x86_64-linux-gnu/bits/mman-map-flags-generic.h:
+
+/usr/include/x86_64-linux-gnu/bits/mman-linux.h:
+
+/usr/include/x86_64-linux-gnu/bits/mman-shared.h:

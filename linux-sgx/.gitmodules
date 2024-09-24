@@ -1,0 +1,25 @@
+[submodule "external/dcap_source"]
+	path = external/dcap_source
+	url = https://github.com/intel/SGXDataCenterAttestationPrimitives.git
+[submodule "openmp"]
+	path = external/openmp/openmp_code
+	url = https://github.com/llvm-mirror/openmp.git
+	branch = svn-tags/RELEASE_801
+[submodule "dnnl"]
+	path = external/dnnl/dnnl
+	url = https://github.com/oneapi-src/oneDNN.git
+	branch = rls-v1.1
+[submodule "ipp-crypto"]
+	path = external/ippcp_internal/ipp-crypto
+	url = https://github.com/intel/ipp-crypto.git
+	branch = ipp-crypto_2021_7
+[submodule "external/protobuf/protobuf_code"]
+	path = external/protobuf/protobuf_code
+	url = https://github.com/protocolbuffers/protobuf.git
+	branch = 3.20.x
+[submodule "external/sgx-emm/emm_src"]
+	path = external/sgx-emm/emm_src
+	url = https://github.com/intel/sgx-emm.git
+[submodule "external/mbedtls/mbedtls_code"]
+	path = external/mbedtls/mbedtls_code
+	url = https://github.com/Mbed-TLS/mbedtls.git

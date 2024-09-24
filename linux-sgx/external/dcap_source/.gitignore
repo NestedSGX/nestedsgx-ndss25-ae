@@ -1,0 +1,25 @@
+#object file
+*.o
+*.obj
+
+#library and symbol file
+*.a
+*.lib
+*.pdb
+
+#share object and dynamic-link library
+*.so
+*.so.*
+*.dll
+*.dll.*
+
+#generated proxy
+*_u.c
+*_u.h
+*_t.c
+*_t.h
+
+#output files
+/QuoteGeneration/build/
+**/Debug/
+**/Release/

@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "utils.h": "c",
+        "export.h": "c",
+        "pgwalk.h": "c",
+        "handlers.h": "c",
+        "enclave.h": "c",
+        "protocols.h": "c",
+        "log.h": "c"
+    }
+}

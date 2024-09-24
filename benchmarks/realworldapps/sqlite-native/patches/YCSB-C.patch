@@ -1,0 +1,859 @@
+diff --git a/Makefile b/Makefile
+index 7baaad8..c80df52 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,24 +1,34 @@
+ CC=g++
+-CFLAGS=-std=c++11 -g -Wall -pthread -I./
+-LDFLAGS= -lpthread -ltbb -lhiredis
+-SUBDIRS=core db redis
+-SUBSRCS=$(wildcard core/*.cc) $(wildcard db/*.cc)
+-OBJECTS=$(SUBSRCS:.cc=.o)
+-EXEC=ycsbc
++CFLAGS ?=-m64 -O2 -Wall -Wextra -Winit-self -Wpointer-arith -Wreturn-type -Waddress -Wsequence-point -Wformat-security -Wmissing-include-dirs -Wfloat-equal -Wundef -Wshadow -Wcast-align -Wnon-virtual-dtor -std=c++11 -fvisibility=hidden -fpie -ffunction-sections -fdata-sections
++LDFLAGS= -lpthread -ldl
++SUBDIRS=core db sqlite
++OBJ_TRTS=core/core_workload.o db/db_factory.o db/sqlite_db.o
++LIB_TRTS=ycsbc_sgx.a
++SGX ?=
+ 
+-all: $(SUBDIRS) $(EXEC)
++ifeq ($(SGX), 1)
++	OBJ_TRTS += sqlite/sqlite3_sgx.o
++else
++	OBJ_TRTS += sqlite/sqlite3.o
++endif
++
++export CFLAGS
++
++all: $(SUBDIRS) $(LIB_TRTS)
+ 
+ $(SUBDIRS):
+ 	$(MAKE) -C $@
+ 
+-$(EXEC): $(wildcard *.cc) $(OBJECTS)
+-	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
++$(LIB_TRTS): $(OBJ_TRTS)
++	ar rvs $@ $^
++
++native: ycsbc.cc $(SUBDIRS)
++	$(CC) $(CFLAGS) -I. ycsbc.cc $(OBJ_TRTS) $(LDFLAGS) -o ycsbc
+ 
+ clean:
+ 	for dir in $(SUBDIRS); do \
+ 		$(MAKE) -C $$dir $@; \
+ 	done
+-	$(RM) $(EXEC)
++	$(RM) *.o *.a
+ 
+ .PHONY: $(SUBDIRS) $(EXEC)
+-
+diff --git a/core/Makefile b/core/Makefile
+index f9cb0ce..1f60311 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -1,12 +1,11 @@
+ CC=g++
+-CFLAGS=-std=c++11 -c -g -Wall
+ SOURCES=$(wildcard *.cc)
+ OBJECTS=$(SOURCES:.cc=.o)
+ 
+ all: $(SOURCES) $(OBJECTS)
+ 
+-.cc.o:
+-	$(CC) $(CFLAGS) $< -o $@
++%.o: %.cc
++	$(CC) $(CFLAGS) -I../ -c $< -o $@
+ 
+ clean:
+ 	$(RM) $(OBJECTS)
+diff --git a/core/properties.h b/core/properties.h
+index 99e1d0b..e1dd9a6 100644
+--- a/core/properties.h
++++ b/core/properties.h
+@@ -11,7 +11,6 @@
+ 
+ #include <string>
+ #include <map>
+-#include <fstream>
+ #include <cassert>
+ #include "utils.h"
+ 
+@@ -25,7 +24,7 @@ class Properties {
+   const std::map<std::string, std::string> &properties() const;
+ 
+   void SetProperty(const std::string &key, const std::string &value);
+-  bool Load(std::ifstream &input);
++  // bool Load(std::ifstream &input);
+  private:
+   std::map<std::string, std::string> properties_;
+ };
+@@ -51,6 +50,7 @@ inline void Properties::SetProperty(const std::string &key,
+   properties_[key] = value;
+ }
+ 
++/*
+ inline bool Properties::Load(std::ifstream &input) {
+   if (!input.is_open()) throw utils::Exception("File not open!");
+ 
+@@ -64,6 +64,7 @@ inline bool Properties::Load(std::ifstream &input) {
+   }
+   return true;
+ }
++*/
+ 
+ } // utils
+ 
+diff --git a/core/utils.h b/core/utils.h
+index 4505dda..a69ccdd 100644
+--- a/core/utils.h
++++ b/core/utils.h
+@@ -14,6 +14,10 @@
+ #include <exception>
+ #include <random>
+ 
++#ifdef SGX_TRUSTED
++extern "C" uint32_t rand();
++#endif
++
+ namespace utils {
+ 
+ const uint64_t kFNVOffsetBasis64 = 0xCBF29CE484222325;
+diff --git a/db/Makefile b/db/Makefile
+index c1699a2..7907dd8 100644
+--- a/db/Makefile
++++ b/db/Makefile
+@@ -1,14 +1,12 @@
+ CC=g++
+-CFLAGS=-std=c++11 -c -g -Wall -fgnu-tm
+ INCLUDES=-I../
+-SOURCES=$(wildcard *.cc)
++SOURCES=sqlite_db.cc db_factory.cc
+ OBJECTS=$(SOURCES:.cc=.o)
+ 
+ all: $(SOURCES) $(OBJECTS)
+ 
+-.cc.o:
+-	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
++%.o: %.cc
++	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+ 
+ clean:
+ 	$(RM) $(OBJECTS)
+-
+diff --git a/db/db_factory.cc b/db/db_factory.cc
+index 38dfb6a..8655874 100644
+--- a/db/db_factory.cc
++++ b/db/db_factory.cc
+@@ -9,29 +9,33 @@
+ #include "db/db_factory.h"
+ 
+ #include <string>
+-#include "db/basic_db.h"
+-#include "db/lock_stl_db.h"
+-#include "db/redis_db.h"
+-#include "db/tbb_rand_db.h"
+-#include "db/tbb_scan_db.h"
++// #include "db/basic_db.h"
++// #include "db/lock_stl_db.h"
++// #include "db/redis_db.h"
++// #include "db/tbb_rand_db.h"
++// #include "db/tbb_scan_db.h"
++#include "db/sqlite_db.h"
+ 
+ using namespace std;
+ using ycsbc::DB;
+ using ycsbc::DBFactory;
+ 
+ DB* DBFactory::CreateDB(utils::Properties &props) {
+-  if (props["dbname"] == "basic") {
+-    return new BasicDB;
+-  } else if (props["dbname"] == "lock_stl") {
+-    return new LockStlDB;
+-  } else if (props["dbname"] == "redis") {
+-    int port = stoi(props["port"]);
+-    int slaves = stoi(props["slaves"]);
+-    return new RedisDB(props["host"].c_str(), port, slaves);
+-  } else if (props["dbname"] == "tbb_rand") {
+-    return new TbbRandDB;
+-  } else if (props["dbname"] == "tbb_scan") {
+-    return new TbbScanDB;
++  // if (props["dbname"] == "basic") {
++  //   return new BasicDB;
++  // }
++  // else if (props["dbname"] == "lock_stl") {
++  //   return new LockStlDB;
++  // } else if (props["dbname"] == "redis") {
++  //   int port = stoi(props["port"]);
++  //   int slaves = stoi(props["slaves"]);
++  //   return new RedisDB(props["host"].c_str(), port, slaves);
++  // } else if (props["dbname"] == "tbb_rand") {
++  //   return new TbbRandDB;
++  // } else if (props["dbname"] == "tbb_scan") {
++  //   return new TbbScanDB;
++  // } else
++  if (props["dbname"] == "sqlite") {
++    return new SqliteDB;
+   } else return NULL;
+ }
+-
+diff --git a/db/sqlite_db.cc b/db/sqlite_db.cc
+new file mode 100644
+index 0000000..097a453
+--- /dev/null
++++ b/db/sqlite_db.cc
+@@ -0,0 +1,216 @@
++//
++//  sqlite_db.cc
++//  YCSB-C
++//
++
++#include "sqlite_db.h"
++
++#include <assert.h>
++#include <cstring>
++
++using namespace std;
++
++extern "C" int printf(const char* fmt, ...);
++extern "C" int puts(const char* str);
++
++const char DB_NAME[] = ":memory:";
++const int FIELD_NUM = 10;
++
++static int callback(void *NotUsed, int argc, char **argv, char **azColName){
++    for (int i = 0; i < argc; i++) {
++        string azColName_str = azColName[i];
++        string argv_str = (argv[i] ? argv[i] : "NULL");
++        printf("%s", (azColName_str + " = " + argv_str + "\n").c_str());
++    }
++    puts("");
++    return 0;
++}
++
++static int execute_sql_key_steps(sqlite3_stmt *pStmt, vector<vector<ycsbc::DB::KVPair>> *result) {
++    int rc = 0;
++    if (result) result->clear();
++    int nCol = sqlite3_column_count(pStmt);
++    while (sqlite3_step(pStmt) == SQLITE_ROW) {
++        if (result) {
++            vector<ycsbc::DB::KVPair> row;
++            for (int i = 0; i < nCol; i++) {
++                auto kv = make_pair((string)sqlite3_column_name(pStmt, i), (string)(char*)sqlite3_column_text(pStmt, i));
++                row.push_back(kv);
++            }
++            result->push_back(row);
++        }
++    }
++    rc = sqlite3_finalize(pStmt);
++    return rc;
++}
++
++static int execute_sql_key(sqlite3 *db, const char *sql, const string& key,
++        vector<vector<ycsbc::DB::KVPair>> *result) {
++    int rc = 0;
++    sqlite3_stmt *pStmt = 0;
++    rc = sqlite3_prepare_v2(db, sql, -1, &pStmt, NULL);
++    assert(rc == SQLITE_OK || pStmt == 0);
++    if (rc) return rc;
++
++    rc = sqlite3_bind_text(pStmt, 1, key.c_str(), key.length(), SQLITE_STATIC);
++    if (rc) return rc;
++
++    return execute_sql_key_steps(pStmt, result);
++}
++
++static int execute_sql_args(sqlite3 *db, const char *sql, const vector<const string*>& args,
++        vector<vector<ycsbc::DB::KVPair>> *result) {
++    int rc = 0;
++    sqlite3_stmt *pStmt = 0;
++    rc = sqlite3_prepare_v2(db, sql, -1, &pStmt, NULL);
++    assert(rc == SQLITE_OK || pStmt == 0);
++    if (rc) return rc;
++
++    for (size_t i = 0; i < args.size(); i++) {
++        rc = sqlite3_bind_text(pStmt, i + 1, args[i]->c_str(), args[i]->length(), SQLITE_STATIC);
++        if (rc) return rc;
++    }
++
++    return execute_sql_key_steps(pStmt, result);
++}
++
++static int execute_sql(sqlite3 *db, const char *sql) {
++    int rc;
++    char *zErrMsg = 0;
++    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
++    if (rc) {
++        printf("SQLite error: ");
++        puts(sqlite3_errmsg(db));
++        return rc;
++    }
++    return 0;
++}
++
++namespace ycsbc {
++
++const int MAX_LEN = 4096 - 1;
++static char stmt[MAX_LEN + 1];
++
++SqliteDB::SqliteDB() {
++    int rc; // For return status of SQLite
++    rc = sqlite3_open(DB_NAME, &this->db); // Opening database
++    if (rc) {
++        puts("SQLite error - can't open database connection: ");
++        puts(sqlite3_errmsg(this->db));
++        return;
++    }
++    printf("Created database connection to %s\n", DB_NAME);
++
++    const char table_name[] = "usertable";
++    snprintf(stmt, MAX_LEN, "DROP TABLE IF EXISTS %s; CREATE TABLE IF NOT EXISTS %s (YCSB_KEY VARCHAR(64) PRIMARY KEY", table_name, table_name);
++    for (size_t i = 0; i < FIELD_NUM; i++) {
++        char field[256];
++        snprintf(field, 255, ", FIELD%ld TEXT", i);
++        strncat(stmt, field, MAX_LEN);
++    }
++    strncat(stmt, ");", MAX_LEN);
++    // puts(stmt);
++    assert(execute_sql(this->db, stmt) == 0);
++}
++
++SqliteDB::~SqliteDB() {
++    sqlite3_close(this->db);
++    puts("Closed database connection");
++}
++
++int SqliteDB::Read(const string &table, const string &key,
++        const vector<string> *fields,
++        vector<KVPair> &result) {
++    vector<const string*> args;
++    if (!fields)
++        snprintf(stmt, MAX_LEN, "SELECT * FROM %s WHERE YCSB_KEY = ?", table.c_str());
++    else {
++        strncpy(stmt, "SELECT ", MAX_LEN);
++        bool first = true;
++        for (auto &f: *fields) {
++            if (first) first = false;
++            else strncat(stmt, ",", MAX_LEN);
++            strncat(stmt, f.c_str(), MAX_LEN);
++        }
++        snprintf(stmt + strlen(stmt), MAX_LEN, " FROM %s WHERE YCSB_KEY = ?", table.c_str());
++    }
++    // puts(stmt);
++
++    vector<vector<KVPair>> results;
++    int rc = execute_sql_key(this->db, stmt, key, &results);
++    if (results.size() > 0)
++        result = results[0];
++    else
++        rc = 1;
++    return rc;
++}
++
++int SqliteDB::Scan(const string &table, const string &key,
++        int len, const vector<string> *fields,
++        vector<vector<KVPair>> &results) {
++    vector<const string*> args;
++    if (!fields)
++        snprintf(stmt, MAX_LEN, "SELECT * FROM %s WHERE YCSB_KEY >= ? LIMIT %d", table.c_str(), len);
++    else {
++        strncpy(stmt, "SELECT ", MAX_LEN);
++        bool first = true;
++        for (auto &f: *fields) {
++            if (first) first = false;
++            else strncat(stmt, ",", MAX_LEN);
++            strncat(stmt, f.c_str(), MAX_LEN);
++        }
++        snprintf(stmt + strlen(stmt), MAX_LEN, " FROM %s WHERE YCSB_KEY >= ? LIMIT %d", table.c_str(), len);
++    }
++    // puts(stmt);
++
++    return execute_sql_key(this->db, stmt, key, &results);
++}
++
++int SqliteDB::Update(const string &table, const string &key,
++            vector<KVPair> &values) {
++    snprintf(stmt, MAX_LEN, "UPDATE %s SET ", table.c_str());
++    bool first = true;
++    vector<const string*> args(values.size() + 1);
++    for (size_t i = 0; i < values.size(); i++) {
++        if (first) first = false;
++        else strncat(stmt, ", ", MAX_LEN);
++        strncat(stmt, values[i].first.c_str(), MAX_LEN);
++        strncat(stmt, "=?", MAX_LEN);
++        args[i] = &values[i].second;
++    }
++    strncat(stmt, " WHERE YCSB_KEY = ?;", MAX_LEN);
++    args[values.size()] = &key;
++    // puts(stmt);
++
++    return execute_sql_args(this->db, stmt, args, NULL);
++}
++
++int SqliteDB::Insert(const string &table, const string &key,
++            vector<KVPair> &values) {
++    snprintf(stmt, MAX_LEN, "INSERT INTO %s (YCSB_KEY", table.c_str());
++    for (auto kv : values) {
++        strncat(stmt, ", ", MAX_LEN);
++        strncat(stmt, kv.first.c_str(), MAX_LEN);
++    }
++    strncat(stmt, ") VALUES (?", MAX_LEN);
++
++    vector<const string*> args(values.size() + 1);
++    args[0] = &key;
++    for (size_t i = 0; i < values.size(); i++) {
++        strncat(stmt, ", ?", MAX_LEN);
++        args[i + 1] = &values[i].second;
++    }
++    strncat(stmt, ");", MAX_LEN);
++    // puts(stmt);
++
++    return execute_sql_args(this->db, stmt, args, NULL);
++}
++
++int SqliteDB::Delete(const string &table, const string &key) {
++    snprintf(stmt, 256, "DELETE FROM %s WHERE YCSB_KEY = ?;", table.c_str());
++    puts(stmt);
++    return execute_sql_key(this->db, stmt, key, NULL);
++}
++
++
++} // namespace ycsbc
+diff --git a/db/sqlite_db.h b/db/sqlite_db.h
+new file mode 100644
+index 0000000..2685f4f
+--- /dev/null
++++ b/db/sqlite_db.h
+@@ -0,0 +1,44 @@
++//
++//  hashtable_db.h
++//  YCSB-C
++//
++//  Created by Jinglei Ren on 12/24/14.
++//  Copyright (c) 2014 Jinglei Ren <jinglei@ren.systems>.
++//
++
++#ifndef YCSB_C_SQLITE_DB_H_
++#define YCSB_C_SQLITE_DB_H_
++
++#include "core/db.h"
++
++#include "sqlite/sqlite3.h"
++
++#include <string>
++#include <vector>
++
++namespace ycsbc {
++
++class SqliteDB : public DB {
++ public:
++  SqliteDB();
++  ~SqliteDB();
++
++  int Read(const std::string &table, const std::string &key,
++           const std::vector<std::string> *fields,
++           std::vector<KVPair> &result);
++  int Scan(const std::string &table, const std::string &key,
++           int len, const std::vector<std::string> *fields,
++           std::vector<std::vector<KVPair>> &result);
++  int Update(const std::string &table, const std::string &key,
++             std::vector<KVPair> &values);
++  int Insert(const std::string &table, const std::string &key,
++             std::vector<KVPair> &values);
++  int Delete(const std::string &table, const std::string &key);
++
++private:
++    sqlite3* db; // Database connection object
++};
++
++} // ycsbc
++
++#endif // YCSB_C_SQLITE_DB_H_
+diff --git a/sqlite/.gitignore b/sqlite/.gitignore
+new file mode 100644
+index 0000000..80de3b1
+--- /dev/null
++++ b/sqlite/.gitignore
+@@ -0,0 +1,5 @@
++sqlite3.h
++sqlite3.i
++sqlite3.c
++sqlite3_sgx.i
++sqlite3_sgx.c
+diff --git a/sqlite/Makefile b/sqlite/Makefile
+new file mode 100644
+index 0000000..2d4a5ca
+--- /dev/null
++++ b/sqlite/Makefile
+@@ -0,0 +1,19 @@
++CC = gcc
++SGX ?=
++
++ifeq ($(SGX), 1)
++	SRC := sqlite3_sgx
++else
++	SRC := sqlite3
++endif
++
++all: $(SRC).o
++
++$(SRC).i: $(SRC).c
++	$(CC) -DSQLITE_THREADSAFE=0 -E $< -o $@
++
++$(SRC).o: $(SRC).i $(SRC).c
++	$(CC) $(CFLAGS) -DSQLITE_THREADSAFE=0 $< -c -o $@
++
++clean:
++	$(RM) *.o *.i
+diff --git a/ycsbc.cc b/ycsbc.cc
+index acf54d9..c14c590 100644
+--- a/ycsbc.cc
++++ b/ycsbc.cc
+@@ -6,27 +6,18 @@
+ //  Copyright (c) 2014 Jinglei Ren <jinglei@ren.systems>.
+ //
+ 
+-#include <cstring>
+-#include <string>
+-#include <iostream>
+-#include <vector>
+-#include <future>
+-#include "core/utils.h"
+-#include "core/timer.h"
+ #include "core/client.h"
+-#include "core/core_workload.h"
+ #include "db/db_factory.h"
++#include "ycsbc_urts.h"
+ 
+ using namespace std;
+ 
+-void UsageMessage(const char *command);
+-bool StrStartWith(const char *str, const char *pre);
+-string ParseCommandLine(int argc, const char *argv[], utils::Properties &props);
++ycsbc::DB *g_db;
++ycsbc::CoreWorkload g_wl;
+ 
+-int DelegateClient(ycsbc::DB *db, ycsbc::CoreWorkload *wl, const int num_ops,
+-    bool is_loading) {
+-  db->Init();
+-  ycsbc::Client client(*db, *wl);
++int DelegateClient(const int num_ops, bool is_loading) {
++  g_db->Init();
++  ycsbc::Client client(*g_db, g_wl);
+   int oks = 0;
+   for (int i = 0; i < num_ops; ++i) {
+     if (is_loading) {
+@@ -35,7 +26,7 @@ int DelegateClient(ycsbc::DB *db, ycsbc::CoreWorkload *wl, const int num_ops,
+       oks += client.DoTransaction();
+     }
+   }
+-  db->Close();
++  g_db->Close();
+   return oks;
+ }
+ 
+@@ -43,139 +34,14 @@ int main(const int argc, const char *argv[]) {
+   utils::Properties props;
+   string file_name = ParseCommandLine(argc, argv, props);
+ 
+-  ycsbc::DB *db = ycsbc::DBFactory::CreateDB(props);
+-  if (!db) {
++  g_db = ycsbc::DBFactory::CreateDB(props);
++  if (!g_db) {
+     cout << "Unknown database name " << props["dbname"] << endl;
+     exit(0);
+   }
+ 
+-  ycsbc::CoreWorkload wl;
+-  wl.Init(props);
++  g_wl.Init(props);
+ 
+-  const int num_threads = stoi(props.GetProperty("threadcount", "1"));
+-
+-  // Loads data
+-  vector<future<int>> actual_ops;
+-  int total_ops = stoi(props[ycsbc::CoreWorkload::RECORD_COUNT_PROPERTY]);
+-  for (int i = 0; i < num_threads; ++i) {
+-    actual_ops.emplace_back(async(launch::async,
+-        DelegateClient, db, &wl, total_ops / num_threads, true));
+-  }
+-  assert((int)actual_ops.size() == num_threads);
+-
+-  int sum = 0;
+-  for (auto &n : actual_ops) {
+-    assert(n.valid());
+-    sum += n.get();
+-  }
+-  cerr << "# Loading records:\t" << sum << endl;
+-
+-  // Peforms transactions
+-  actual_ops.clear();
+-  total_ops = stoi(props[ycsbc::CoreWorkload::OPERATION_COUNT_PROPERTY]);
+-  utils::Timer<double> timer;
+-  timer.Start();
+-  for (int i = 0; i < num_threads; ++i) {
+-    actual_ops.emplace_back(async(launch::async,
+-        DelegateClient, db, &wl, total_ops / num_threads, false));
+-  }
+-  assert((int)actual_ops.size() == num_threads);
+-
+-  sum = 0;
+-  for (auto &n : actual_ops) {
+-    assert(n.valid());
+-    sum += n.get();
+-  }
+-  double duration = timer.End();
+-  cerr << "# Transaction throughput (KTPS)" << endl;
+-  cerr << props["dbname"] << '\t' << file_name << '\t' << num_threads << '\t';
+-  cerr << total_ops / duration / 1000 << endl;
+-}
+-
+-string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) {
+-  int argindex = 1;
+-  string filename;
+-  while (argindex < argc && StrStartWith(argv[argindex], "-")) {
+-    if (strcmp(argv[argindex], "-threads") == 0) {
+-      argindex++;
+-      if (argindex >= argc) {
+-        UsageMessage(argv[0]);
+-        exit(0);
+-      }
+-      props.SetProperty("threadcount", argv[argindex]);
+-      argindex++;
+-    } else if (strcmp(argv[argindex], "-db") == 0) {
+-      argindex++;
+-      if (argindex >= argc) {
+-        UsageMessage(argv[0]);
+-        exit(0);
+-      }
+-      props.SetProperty("dbname", argv[argindex]);
+-      argindex++;
+-    } else if (strcmp(argv[argindex], "-host") == 0) {
+-      argindex++;
+-      if (argindex >= argc) {
+-        UsageMessage(argv[0]);
+-        exit(0);
+-      }
+-      props.SetProperty("host", argv[argindex]);
+-      argindex++;
+-    } else if (strcmp(argv[argindex], "-port") == 0) {
+-      argindex++;
+-      if (argindex >= argc) {
+-        UsageMessage(argv[0]);
+-        exit(0);
+-      }
+-      props.SetProperty("port", argv[argindex]);
+-      argindex++;
+-    } else if (strcmp(argv[argindex], "-slaves") == 0) {
+-      argindex++;
+-      if (argindex >= argc) {
+-        UsageMessage(argv[0]);
+-        exit(0);
+-      }
+-      props.SetProperty("slaves", argv[argindex]);
+-      argindex++;
+-    } else if (strcmp(argv[argindex], "-P") == 0) {
+-      argindex++;
+-      if (argindex >= argc) {
+-        UsageMessage(argv[0]);
+-        exit(0);
+-      }
+-      filename.assign(argv[argindex]);
+-      ifstream input(argv[argindex]);
+-      try {
+-        props.Load(input);
+-      } catch (const string &message) {
+-        cout << message << endl;
+-        exit(0);
+-      }
+-      input.close();
+-      argindex++;
+-    } else {
+-      cout << "Unknown option '" << argv[argindex] << "'" << endl;
+-      exit(0);
+-    }
+-  }
+-
+-  if (argindex == 1 || argindex != argc) {
+-    UsageMessage(argv[0]);
+-    exit(0);
+-  }
+-
+-  return filename;
+-}
+-
+-void UsageMessage(const char *command) {
+-  cout << "Usage: " << command << " [options]" << endl;
+-  cout << "Options:" << endl;
+-  cout << "  -threads n: execute using n threads (default: 1)" << endl;
+-  cout << "  -db dbname: specify the name of the DB to use (default: basic)" << endl;
+-  cout << "  -P propertyfile: load properties from the given file. Multiple files can" << endl;
+-  cout << "                   be specified, and will be processed in the order specified" << endl;
+-}
+-
+-inline bool StrStartWith(const char *str, const char *pre) {
+-  return strncmp(str, pre, strlen(pre)) == 0;
++  run_benchmark(props, file_name);
+ }
+ 
+diff --git a/ycsbc_urts.h b/ycsbc_urts.h
+new file mode 100644
+index 0000000..17aa19b
+--- /dev/null
++++ b/ycsbc_urts.h
+@@ -0,0 +1,155 @@
++#include <cstring>
++#include <string>
++#include <iostream>
++#include <fstream>
++#include <vector>
++#include <future>
++#include <sys/time.h>
++#include "core/utils.h"
++#include "core/timer.h"
++#include "core/core_workload.h"
++
++using namespace std;
++
++void UsageMessage(const char *command);
++bool StrStartWith(const char *str, const char *pre);
++string ParseCommandLine(int argc, const char *argv[], utils::Properties &props);
++
++extern "C" int DelegateClient(const int num_ops, bool is_loading);
++
++void run_benchmark(const utils::Properties& props, const std::string& file_name) {
++	struct timeval tval_before, tval_after, tval_result;
++	int record_count = stoi(props["recordcount"]);
++	int op_count = stoi(props["operationcount"]);
++
++	// Loads data
++	gettimeofday(&tval_before, NULL);
++	int load_success = DelegateClient(record_count, true);
++	gettimeofday(&tval_after, NULL);
++	timersub(&tval_after, &tval_before, &tval_result);
++	printf("# Loading records: %d/%d (%ld.%06ld s)\n", load_success, record_count,
++		(long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
++
++	// Peforms transactions
++	gettimeofday(&tval_before, NULL);
++	int trans_success = DelegateClient(op_count, false);
++	gettimeofday(&tval_after, NULL);
++	timersub(&tval_after, &tval_before, &tval_result);
++	printf("# successful records: %d/%d (%ld.%06ld s)\n", trans_success, op_count,
++		(long int)tval_result.tv_sec, (long int)tval_result.tv_usec);
++	
++	printf("# Transaction throughput (KTPS):\n");
++	printf("%.4lf\n", op_count / 1000.0 / (tval_result.tv_sec + tval_result.tv_usec / 1e6));
++}
++
++string ParseCommandLine(int argc, const char *argv[], utils::Properties &props) {
++	int argindex = 1;
++	string filename;
++	while (argindex < argc && StrStartWith(argv[argindex], "-")) {
++		if (strcmp(argv[argindex], "-threads") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("threadcount", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-db") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("dbname", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-host") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("host", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-port") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("port", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-slaves") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("slaves", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-n") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("recordcount", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-t") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			props.SetProperty("operationcount", argv[argindex]);
++			argindex++;
++		} else if (strcmp(argv[argindex], "-P") == 0) {
++			argindex++;
++			if (argindex >= argc) {
++				UsageMessage(argv[0]);
++				exit(0);
++			}
++			filename.assign(argv[argindex]);
++			ifstream input(argv[argindex]);
++			try {
++				if (!input.is_open()) throw utils::Exception("File not open!");
++				while (!input.eof() && !input.bad()) {
++					std::string line;
++					std::getline(input, line);
++					if (line[0] == '#') continue;
++					size_t pos = line.find_first_of('=');
++					if (pos == std::string::npos) continue;
++					props.SetProperty(utils::Trim(line.substr(0, pos)), utils::Trim(line.substr(pos + 1)));
++				}
++			} catch (const string &message) {
++				cout << message << endl;
++				exit(0);
++			}
++			input.close();
++			argindex++;
++		} else {
++		//   printf("Unknown option '%s'\n", argv[argindex]);
++			cout << "Unknown option '" << argv[argindex] << "'" << endl;
++			exit(0);
++		}
++	}
++
++	if (argindex == 1 || argindex != argc) {
++		UsageMessage(argv[0]);
++		exit(0);
++	}
++
++	return filename;
++}
++
++void UsageMessage(const char *command) {
++	printf("Usage: %s [options]\n", command);
++	printf("Options:\n");
++	printf("  -threads n: execute using n threads (default: 1)\n");
++	printf("  -db dbname: specify the name of the DB to use (default: basic)\n");
++	printf("  -P propertyfile: load properties from the given file. Multiple files can\n");
++	printf("                   be specified, and will be processed in the order specified\n");
++}
++
++inline bool StrStartWith(const char *str, const char *pre) {
++	return strncmp(str, pre, strlen(pre)) == 0;
++}

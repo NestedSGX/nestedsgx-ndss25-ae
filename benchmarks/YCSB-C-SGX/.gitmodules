@@ -1,0 +1,3 @@
+[submodule "YCSB-C"]
+	path = YCSB-C
+	url = https://github.com/basicthinker/YCSB-C

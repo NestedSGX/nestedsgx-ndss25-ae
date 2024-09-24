@@ -1,0 +1,17 @@
+{
+    global:
+        occlum_pal_get_version;
+        occlum_pal_init;
+        occlum_pal_create_process;
+        occlum_pal_exec;
+        occlum_pal_kill;
+        occlum_pal_destroy;
+        pal_get_version;
+        pal_init;
+        pal_create_process;
+        pal_exec;
+        pal_kill;
+        pal_destroy;
+    local:
+        *;
+};

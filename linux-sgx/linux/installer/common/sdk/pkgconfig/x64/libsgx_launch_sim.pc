@@ -1,0 +1,10 @@
+prefix=/opt/intel/sgxsdk
+includedir=${prefix}/include
+libdir=${prefix}/lib64
+
+Name: libsgx_launch_sim
+Description: SGX launch simulation library
+Version: 2.20.100.4
+Cflags: -I${includedir}
+Libs: -L${libdir} -lsgx_launch_sim
+Libs.private: -lsgx_launch_sim

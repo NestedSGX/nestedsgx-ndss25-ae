@@ -1,0 +1,25 @@
+sudo: false
+dist: trusty
+
+language: rust
+
+matrix:
+  include:
+  - name: Stable
+    rust: stable
+  - name: Beta
+    rust: beta
+  - name: Nightly
+    rust: nightly
+  - name: test-protoc-plugin
+    rust: stable
+    env: ACTION=test-protoc-plugin
+
+script:
+  - ci/run.sh
+
+notifications:
+  email:
+    on_success: never
+
+# vim: set ts=2 sw=2 et:

@@ -1,0 +1,16 @@
+includes:
+  - base.yaml
+# dcap
+targets:
+  # copy bins
+  - target: /bin
+    copy:
+      - files:
+        - /opt/occlum/toolchains/dcap_lib/musl/dcap_test
+        - ../c_app/dcap_c_test
+  # copy lib
+  - target: /lib
+    copy:
+      - files:
+        - /opt/occlum/toolchains/dcap_lib/musl/libocclum_dcap.so.0.1.0
+

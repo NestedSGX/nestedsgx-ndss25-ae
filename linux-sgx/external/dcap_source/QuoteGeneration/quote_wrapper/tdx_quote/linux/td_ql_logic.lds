@@ -1,0 +1,14 @@
+{
+global:
+    tee_att_create_context;
+    tee_att_free_context;
+    tee_att_init_quote;
+    tee_att_get_quote_size;
+    tee_att_get_quote;
+    tee_att_get_keyid;
+    tee_att_set_path;
+    tee_att_get_qpl_handle;
+    tee_att_get_platform_info;
+local:
+    *;
+};

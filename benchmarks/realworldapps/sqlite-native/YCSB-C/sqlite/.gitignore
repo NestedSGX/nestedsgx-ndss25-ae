@@ -1,0 +1,5 @@
+sqlite3.h
+sqlite3.i
+sqlite3.c
+sqlite3_sgx.i
+sqlite3_sgx.c

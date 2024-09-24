@@ -1,0 +1,49 @@
+diff --git a/sqlite3.c b/sqlite3_sgx.c
+index 9c8fd62..4648414 100644
+--- a/sqlite3.c
++++ b/sqlite3_sgx.c
+@@ -30227,6 +30227,12 @@ static int posixOpen(const char *zFile, int flags, int mode){
+ static int openDirectory(const char*, int*);
+ static int unixGetpagesize(void);
+ 
++// SGX rederfine these system call as we cannot define stat64 struct
++int sgx_lstat(const char *path, struct stat *buf);
++int sgx_stat(const char *path, struct stat *buf);
++int sgx_fstat(int fd, struct stat *buf);
++int sgx_ftruncate(int fd, off_t length);
++
+ /*
+ ** Many system calls are accessed through pointer-to-functions so that
+ ** they may be overridden at runtime to facilitate fault injection during
+@@ -30250,7 +30256,7 @@ static struct unix_syscall {
+   { "getcwd",       (sqlite3_syscall_ptr)getcwd,     0  },
+ #define osGetcwd    ((char*(*)(char*,size_t))aSyscall[3].pCurrent)
+ 
+-  { "stat",         (sqlite3_syscall_ptr)stat,       0  },
++  { "stat",         (sqlite3_syscall_ptr)sgx_stat,       0  },
+ #define osStat      ((int(*)(const char*,struct stat*))aSyscall[4].pCurrent)
+ 
+ /*
+@@ -30263,11 +30269,11 @@ static struct unix_syscall {
+   { "fstat",        0,                 0  },
+ #define osFstat(a,b,c)    0
+ #else     
+-  { "fstat",        (sqlite3_syscall_ptr)fstat,      0  },
++  { "fstat",        (sqlite3_syscall_ptr)sgx_fstat,      0  },
+ #define osFstat     ((int(*)(int,struct stat*))aSyscall[5].pCurrent)
+ #endif
+ 
+-  { "ftruncate",    (sqlite3_syscall_ptr)ftruncate,  0  },
++  { "ftruncate",    (sqlite3_syscall_ptr)sgx_ftruncate,  0  },
+ #define osFtruncate ((int(*)(int,off_t))aSyscall[6].pCurrent)
+ 
+   { "fcntl",        (sqlite3_syscall_ptr)fcntl,      0  },
+@@ -30377,7 +30383,7 @@ static struct unix_syscall {
+ #define osReadlink ((ssize_t(*)(const char*,char*,size_t))aSyscall[26].pCurrent)
+ 
+ #if defined(HAVE_LSTAT)
+-  { "lstat",         (sqlite3_syscall_ptr)lstat,          0 },
++  { "lstat",         (sqlite3_syscall_ptr)sgx_lstat,          0 },
+ #else
+   { "lstat",         (sqlite3_syscall_ptr)0,              0 },
+ #endif
