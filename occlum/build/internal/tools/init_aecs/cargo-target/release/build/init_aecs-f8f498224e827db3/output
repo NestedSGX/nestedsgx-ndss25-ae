@@ -1,0 +1,7 @@
+cargo:rustc-link-search=native=/opt/occlum/toolchains/aecs_client
+cargo:rustc-link-lib=dylib=aecs_client
+cargo:rustc-link-lib=dylib=ual
+cargo:rustc-link-lib=curl_static
+cargo:rustc-link-lib=dylib=ssl
+cargo:rustc-link-lib=dylib=z
+cargo:rustc-link-lib=dylib=crypto

@@ -1,0 +1,11 @@
+/root/occlum/build/internal/tools/copy_bom/cargo-target/debug/deps/libyaml_rust-185c490e7ad4f2ce.rmeta: /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/lib.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/emitter.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/parser.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/scanner.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/yaml.rs
+
+/root/occlum/build/internal/tools/copy_bom/cargo-target/debug/deps/libyaml_rust-185c490e7ad4f2ce.rlib: /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/lib.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/emitter.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/parser.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/scanner.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/yaml.rs
+
+/root/occlum/build/internal/tools/copy_bom/cargo-target/debug/deps/yaml_rust-185c490e7ad4f2ce.d: /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/lib.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/emitter.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/parser.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/scanner.rs /root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/yaml.rs
+
+/root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/lib.rs:
+/root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/emitter.rs:
+/root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/parser.rs:
+/root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/scanner.rs:
+/root/.cargo/registry/src/mirrors.tuna.tsinghua.edu.cn-df7c3c540f42cdbd/yaml-rust-0.4.5/src/yaml.rs:

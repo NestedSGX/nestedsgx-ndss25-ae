@@ -1,0 +1,1 @@
+/root/occlum/build/internal/tools/copy_bom/cargo-target/debug/copy_bom: /root/occlum/tools/copy_bom/src/bom.rs /root/occlum/tools/copy_bom/src/error.rs /root/occlum/tools/copy_bom/src/main.rs /root/occlum/tools/copy_bom/src/util.rs

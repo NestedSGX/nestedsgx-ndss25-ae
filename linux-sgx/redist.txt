@@ -1,0 +1,10 @@
+<topdir>/external/ippcp_internal/inc/ippcp.h
+<topdir>/external/ippcp_internal/inc/ippcpdefs.h
+<topdir>/external/ippcp_internal/inc/ippversion.h
+<topdir>/external/ippcp_internal/inc/sgx_ippcp.h
+<topdir>/external/ippcp_internal/lib/linux/intel64/cve_2020_0551_load/libippcp.a
+<topdir>/external/ippcp_internal/lib/linux/intel64/cve_2020_0551_cf/libippcp.a
+<topdir>/external/ippcp_internal/lib/linux/intel64/no_mitigation/libippcp.a
+<topdir>/external/libm/SVML_Intel64_Linux/libsvml.a
+<topdir>/external/libm/Libm_ct_Linux/libimf.a
+<topdir>/external/libirc/efi2/libirc.a
