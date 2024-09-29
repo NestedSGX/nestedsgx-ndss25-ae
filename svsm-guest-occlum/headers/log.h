@@ -8,7 +8,7 @@
 
 #define vs_info(fmt...)  pr_info(fmt)
 #define vs_warn(fmt...)  pr_warn("VS_WARN. " fmt)
-#define vs_err(fmt...)  pr_err("VS_ERROR. " fmt)
+#define vs_err(fmt...)  pr_err("VS_INFO. " fmt)
 
 #ifdef DEBUG
 #define VS_DEBUG(fmt, args...) vs_info(fmt, ##args)

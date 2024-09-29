@@ -52,7 +52,7 @@ When the above 3 steps done, you can run all of the SampleCode of SGX that can b
 Occlum relys on the docker environment provided by Ant Group, **please first make sure you have successfuly insmod the Guest Module in last step,** then, set up the environment like following:
 ```python
 # pull and run the image that support the occlum.
-docker run -it --privileged -v /dev/svsm_guest:[your_rootpath_of_image_in_the_guestOS] occlum/occlum:0.29.7-ubuntu20.04
+docker run -it --privileged -v /dev/vmpl_sgx_driver:[your_rootpath_of_image_in_the_guestOS] occlum/occlum:0.29.7-ubuntu20.04
 
 # set up the modified linux-sgx environment like step 3, make sure you've installed the sgxsdk in the path named '/opt/intel/sgxsdk/'
 source /opt/intel/sgxsdk/environment

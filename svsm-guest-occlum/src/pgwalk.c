@@ -2,17 +2,19 @@
 #include "../headers/log.h"
 #include "../headers/export.h"
 
-void judge(unsigned long address, int flag) {
+void judge(unsigned long pte_flags, int flag) {
     if (flag == 0) {
         // code page trampoline.
-        if (address >= 51 == 1) {
+        // vs_err("pte_flags: %lx %lx %lx", pte_flags, pte_flags >> 51, pte_flags >> 52);
+        if ((pte_flags >> 51) == 1 && (pte_flags >> 52) == 0) {
             vs_err("code page trampoline succeed.\n");
         } else {
             vs_err("code page trampoline fail.\n");
         }
     } else {
         // data page trampoline.
-        if (address >= 63 == 1) {
+        // vs_err("pte_flags: %lx %lx %lx", pte_flags, (pte_flags >> 63), (pte_flags >> 62) & 1);
+        if ((pte_flags >> 63) == 1 && ((pte_flags >> 62) & 1) == 0) {
             vs_err("data page trampoline succeed.\n");
         } else {
             vs_err("data page trampoline fail.\n");
@@ -62,7 +64,7 @@ void print_page_table_entry(unsigned long address, int flag) {
         unsigned long pte_flags = pte_val(*pte);
         vs_err("Page table entry at virtual address %lx:\n", address);
         vs_err("  PTE Value: %lx\n", pte_flags);
-        judge(address, flag);
+        judge(pte_flags, flag);
     } else {
         vs_err("Page not present at virtual address %lx\n", address);
         vs_err("trampoline initialization failed");
