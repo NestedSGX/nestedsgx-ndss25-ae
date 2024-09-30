@@ -434,3 +434,25 @@ int handle_perf(void __user *arg) {
     vs_err("eenter_num: %llx\n", eenter_num);
     return SUCCESS;
 }
+
+// For benchmarking simplicity, we combine eremove and ecreate as a whole.
+// In fact we kinda little use the actual eremove instruction during our process.
+int handle_eremove(void __user *arg){
+    struct svsm_service_request request;
+
+    // copy request from user, store it in svsm_service_request request.
+    Copy_from_user(&request, (void*) arg, sizeof(struct svsm_service_request));
+
+    // the virtual address of secs in user app.
+    unsigned long secs_va = request.rcx;
+    
+    // copy the secs info into the sgx_tmp_page,
+    // the Monitor share the sgx_tmp_page with the Guest Module by using the same physical address.
+    Copy_from_user(sgx_tmp_page, (void*) secs_va, PAGE_SIZE);
+
+    svsm_service(&request);
+    
+    // clear the sgx_tmp_page.
+    memset(sgx_tmp_page, 0, PAGE_SIZE);
+    return SUCCESS;
+}

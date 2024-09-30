@@ -41,6 +41,7 @@
 #define EINIT                       0x3
 #define EENTER                      0x4
 #define EEXTEND                     0x5
+#define EREMOVE                     0x6
 #define EWB                         0x7
 #define ERESUME                     0xb
 #define EAUG                        0x22
@@ -63,9 +64,10 @@
 
 #define SVSM_ECREATE                            SVSM_IOC_SEND_REQUEST(ECREATE)
 #define SVSM_EADD                               SVSM_IOC_SEND_REQUEST(EADD)
-#define SVSM_EINIT                               SVSM_IOC_SEND_REQUEST(EINIT)
+#define SVSM_EINIT                              SVSM_IOC_SEND_REQUEST(EINIT)
 #define SVSM_EENTER                             SVSM_IOC_SEND_REQUEST(EENTER)
 #define SVSM_EEXTEND                            SVSM_IOC_SEND_REQUEST(EEXTEND)
+#define SVSM_EREMOVE                            SVSM_IOC_SEND_REQUEST(EREMOVE)
 #define SVSM_TEST                               SVSM_IOC_SEND_REQUEST(TEST)
 #define SVSM_ERESUME                            SVSM_IOC_SEND_REQUEST(ERESUME)
 #define SVSM_EAUG                               SVSM_IOC_SEND_REQUEST(EAUG) 

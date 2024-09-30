@@ -101,6 +101,9 @@ static long vs_driver_unlocked_ioctl(struct file *file, unsigned int cmd, unsign
         case SVSM_EINIT:
             ret = handle_einit((void __user *) arg);
             break;
+        case SVSM_EREMOVE:
+            ret = handle_eremove((void __user *) arg);
+            break;
         case SVSM_EEXTEND:
             // vs_err("SVSM_FSGS\n");
             ret = handle_eextend((void __user *) arg);
