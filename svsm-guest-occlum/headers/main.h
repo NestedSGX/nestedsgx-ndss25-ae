@@ -43,6 +43,7 @@
 #define EEXTEND                     0x5
 #define EREMOVE                     0x6
 #define EWB                         0x7
+#define ELDB                        0x8
 #define ERESUME                     0xb
 #define EAUG                        0x22
 // sgx interrupt handlers.
@@ -73,6 +74,7 @@
 #define SVSM_EAUG                               SVSM_IOC_SEND_REQUEST(EAUG) 
 #define SVSM_EBLOCK                             SVSM_IOC_SEND_REQUEST(EBLOCK)
 #define SVSM_EWB                                SVSM_IOC_SEND_REQUEST(EWB)
+#define SVSM_ELDB                               SVSM_IOC_SEND_REQUEST(ELDB)
 #define SVSM_TRAMPOLINE_INIT_APP                SVSM_IOC_SEND_REQUEST(TRMAPOLINE_INIT_APP)
 
 #define SVSM_PERF                               SVSM_IOC_SEND_REQUEST(PERF)

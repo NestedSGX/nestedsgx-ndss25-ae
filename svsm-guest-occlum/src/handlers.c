@@ -305,7 +305,25 @@ int handle_eadd(void __user *arg) {
     return SUCCESS;
 }
 
+int handle_eldb(void __user * arg) {
+    struct svsm_service_request request;
 
+    // copy request from user, store it in svsm_service_request request.
+    Copy_from_user(&request, (void*) arg, sizeof(struct svsm_service_request));
+
+    // the virtual address of secs in user app.
+    unsigned long page_va = request.rcx;
+    
+    // copy the secs info into the sgx_tmp_page,
+    // the Monitor share the sgx_tmp_page with the Guest Module by using the same physical address.
+    Copy_from_user(sgx_tmp_page, (void*) page_va, PAGE_SIZE);
+
+    svsm_service(&request);
+    
+    // clear the sgx_tmp_page.
+    memset(sgx_tmp_page, 0, PAGE_SIZE);
+    return SUCCESS;
+}
 /// @brief handle_eenter: use arg to enter the enclave
 /// @param arg: many args
 /// @return SUCCESS or -EFAULT
@@ -448,7 +466,7 @@ int handle_eremove(void __user *arg){
     
     // copy the secs info into the sgx_tmp_page,
     // the Monitor share the sgx_tmp_page with the Guest Module by using the same physical address.
-    Copy_from_user(sgx_tmp_page, (void*) secs_va, PAGE_SIZE);
+    // Copy_from_user(sgx_tmp_page, (void*) secs_va, PAGE_SIZE);
 
     svsm_service(&request);
     

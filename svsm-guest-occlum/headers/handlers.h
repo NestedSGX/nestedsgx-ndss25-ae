@@ -15,6 +15,8 @@ int     handle_eenter   (void __user *arg);
 int     handle_eextend  (void __user *arg);
 int     handle_test     (void __user *arg);
 int     handle_eresume  (void __user *arg);
+int     handle_eremove  (void __user *arg);
+int     handle_eldb     (void __user *arg);
 int     handle_tramp    (void __user *arg);
 int     handle_eaug     (void __user *arg);
 int     handle_eblock   (void __user *arg);

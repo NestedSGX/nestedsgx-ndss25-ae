@@ -94,6 +94,9 @@ static long vs_driver_unlocked_ioctl(struct file *file, unsigned int cmd, unsign
             //vs_err("SVSM_EADD\n");
             ret = handle_eadd((void __user *) arg);
             break;
+        case SVSM_ELDB:
+            ret = handle_eldb((void __user *) arg);
+            break;
         case SVSM_EENTER:
             // vs_err("SVSM_EENTER\n");
             ret = handle_eenter((void __user *) arg);
