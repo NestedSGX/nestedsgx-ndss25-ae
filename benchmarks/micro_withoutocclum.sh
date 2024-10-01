@@ -7,7 +7,7 @@ cd microbenchmarks
 
 cd ecall_ocall && ./edgecalls.sh && cd ..
 
-cd lmbench && ./lmbench.sh && cd ..
+cd lmbench/bw-mem && ./lmbench.sh && cd ..
 
 cd sgx-nbench && ./nbnech.sh && cd ..
 

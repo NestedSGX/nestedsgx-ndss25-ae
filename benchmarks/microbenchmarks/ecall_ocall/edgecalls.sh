@@ -1,4 +1,4 @@
 #!/bin/bash
 echo "edge_call"
 
-make SGX_MODE=SIM && ./app && make clean
+source /opt/intel/sgxsdk/environment && make SGX_MODE=SIM && ./app && make clean
