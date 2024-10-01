@@ -131,6 +131,9 @@ static long vs_driver_unlocked_ioctl(struct file *file, unsigned int cmd, unsign
         case SVSM_EBLOCK:
             ret = handle_eblock((void __user *) arg);
             break;
+        case SVSM_EMODPR:
+            ret = handle_emodpr((void __user *) arg);
+            break;
         case SVSM_PERF:
             ret = handle_perf((void __user *) arg);
             break;

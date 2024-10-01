@@ -405,6 +405,11 @@ int handle_eblock(void __user *arg) {
     return SUCCESS;
 }
 
+int handle_emodpr(void __user * arg) {
+    handle_core(arg);
+    return SUCCESS;
+}
+
 int handle_einit(void __user *arg) {
     struct svsm_service_request request;
 

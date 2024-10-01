@@ -23,5 +23,7 @@ int     handle_eblock   (void __user *arg);
 int     handle_einit    (void __user *arg);
 int     handle_ewb      (void __user *arg);
 int     handle_perf     (void __user *arg);
+int     handle_emodpr   (void __user * arg);
+
 #define SUCCESS 0
 #endif

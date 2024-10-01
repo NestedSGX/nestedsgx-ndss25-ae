@@ -90,6 +90,7 @@ struct svsm_service_request {
 #define ERESUME         0xb
 #define EBLOCK          0x23
 #define PERF            0xff
+#define EMODPR          0x9
 // SGX Assisted paras.
 #define TRAMPOLINE_INIT_APP             0x11
 
@@ -115,6 +116,7 @@ struct svsm_service_request {
 #define SVSM_EWB                        SVSM_IOC_SEND_REQUEST(EWB)
 #define SVSM_PERF                       SVSM_IOC_SEND_REQUEST(PERF)
 #define SVSM_ELDB                       SVSM_IOC_SEND_REQUEST(ELDB)
+#define SVSM_EMODPR                     SVSM_IOC_SEND_REQUEST(EMODPR)
 // SGX Assisted Request.
 #define SVSM_TRAMPOLINE_INIT_APP        SVSM_IOC_SEND_REQUEST(TRAMPOLINE_INIT_APP)
 
@@ -159,6 +161,7 @@ struct svsm_service_request {
 #define SVSM_SGX_EREMOVE                0x6
 #define SVSM_SGX_EWB                    0x7
 #define SVSM_SGX_ELDB                   0x8
+#define SVSM_SGX_EMODPR                 0x9
 #define SVSM_SGX_ERESUME                0xb
 
 #define SVSM_SGX_EAUG                   0x22

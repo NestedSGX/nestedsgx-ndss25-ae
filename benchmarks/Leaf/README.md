@@ -7,14 +7,24 @@ In fact the benchmarking version of these leaf functions might sound very weird,
 
 We set up this benchmarks simply for a evaluation. We will try to keep the main tasks of these instructions unchanged.
 
-| Inst | number | Implement |
+
+<!-- | Inst | number | Implement |
 | ------   | -- | --- |
 | ECREATE: | 1 | &#10004; |
 | EADD: | 2 | &#10004; |
 | EEXTEND: | 5 | &#10004;|
 | EINIT: | 3 | &#10004; |
-| EREMOVE: | 6 | &#10004; |
+| EREMOVE: | 6 | &#10004; | -->
 
+Running `make bench` will show the performance of ENCLS instructions.
 
-### Others:
-scp -r link@192.168.104.4:/home/link/nestedsgx_archive/benchmarks/Leaf .
+While for EGETKEY and EREPORT, do the following steps:
+```
+source /opt/intel/sgxsdk/environment
+cd EGETKEY
+make SGX_MODE=SIM
+./app
+```
+These two benchmarks might cause great amount time, so please wait for a while.
+<!-- ### Others:
+scp -r link@192.168.104.4:/home/link/nestedsgx_archive/benchmarks/Leaf . -->

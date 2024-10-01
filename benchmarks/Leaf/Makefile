@@ -1,4 +1,3 @@
-# 定义变量
 CC = g++
 SRC = $(wildcard *.cpp)
 OBJ = $(SRC:.cpp=)
