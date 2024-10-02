@@ -1,0 +1,58 @@
+From 836d2516138edc08819e0a43fa7d9f2bc752ddbf Mon Sep 17 00:00:00 2001
+From: Unik-lif <songlinke18@mails.ucas.ac.cn>
+Date: Wed, 2 Oct 2024 15:45:00 +0000
+Subject: [PATCH 1/2] update our version
+
+---
+ SGX_Linux/sgx_t.mk | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/SGX_Linux/sgx_t.mk b/SGX_Linux/sgx_t.mk
+index 7153aa3..aa61bd2 100644
+--- a/SGX_Linux/sgx_t.mk
++++ b/SGX_Linux/sgx_t.mk
+@@ -66,14 +66,14 @@ ifeq ($(HAVE_WOLFSSL_SP), 1)
+                              -DWOLFSSL_HAVE_SP_ECC
+ endif
+ 
+-Flags_Just_For_C := -Wno-implicit-function-declaration -std=c99
++Flags_Just_For_C := -Wno-implicit-function-declaration -std=c11
+ Common_C_Cpp_Flags := $(SGX_COMMON_CFLAGS) -nostdinc -fvisibility=hidden -fpie -fstack-protector $(Wolfssl_Enclave_Include_Paths)-fno-builtin -fno-builtin-printf -I.
+ Wolfssl_Enclave_C_Flags := $(Flags_Just_For_C) $(Common_C_Cpp_Flags) $(Wolfssl_C_Extra_Flags)
+ 
+ Wolfssl_Enclave_Link_Flags := $(SGX_COMMON_CFLAGS) -Wl,--no-undefined -nostdlib -nodefaultlibs -nostartfiles -L$(SGX_LIBRARY_PATH) \
+ 	-L$(SGX_WOLFSSL_LIB) -lwolfssl.sgx.static.lib \
+ 	-Wl,--whole-archive -l$(Trts_Library_Name) -Wl,--no-whole-archive \
+-	-Wl,--start-group -lsgx_tstdc -lsgx_tstdcxx -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,--end-group \
++	-Wl,--start-group -lsgx_tstdc -l$(Crypto_Library_Name) -l$(Service_Library_Name) -Wl,--end-group \
+ 	-Wl,-Bstatic -Wl,-Bsymbolic -Wl,--no-undefined \
+ 	-Wl,-pie,-eenclave_entry -Wl,--export-dynamic  \
+ 	-Wl,--defsym,__ImageBase=0 \
+-- 
+2.34.1
+
+
+From 51b64db7a2281cbb1fe2b2ccca22099717be1704 Mon Sep 17 00:00:00 2001
+From: Unik-lif <songlinke18@mails.ucas.ac.cn>
+Date: Wed, 2 Oct 2024 15:52:09 +0000
+Subject: [PATCH 2/2] another
+
+---
+ SGX_Linux/build.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/SGX_Linux/build.sh b/SGX_Linux/build.sh
+index 0281298..5cda120 100755
+--- a/SGX_Linux/build.sh
++++ b/SGX_Linux/build.sh
+@@ -5,6 +5,6 @@ if [ -z $1 ]; then
+     exit 1
+ fi
+ 
+-make SGX_MODE=HW SGX_PRERELEASE=1 SGX_WOLFSSL_LIB=${1}IDE/LINUX-SGX/ WOLFSSL_ROOT=${1} SGX_DEBUG=0 HAVE_WOLFSSL_TEST=1 HAVE_WOLFSSL_BENCHMARK=1 HAVE_WOLFSSL_SP=1
++make SGX_MODE=SIM SGX_PRERELEASE=1 SGX_WOLFSSL_LIB=${1}IDE/LINUX-SGX/ WOLFSSL_ROOT=${1} SGX_DEBUG=0 HAVE_WOLFSSL_TEST=1 HAVE_WOLFSSL_BENCHMARK=1 HAVE_WOLFSSL_SP=1
+ 
+ exit 0
+-- 
+2.34.1
+
