@@ -39,7 +39,7 @@ if [ -z "$op_count" ]; then
 fi
 
 if [ -z "$APP" ]; then
-    APP=./YCSB-C/ycsbc
+    APP=./app
 fi
 
 if [ -z "$workload" ]; then

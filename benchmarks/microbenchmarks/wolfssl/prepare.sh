@@ -14,3 +14,4 @@ echo "build the static library"
 
 cd ../../wolfssl-examples/SGX_Linux
 ./build.sh ../../wolfssl-5.7.0-stable/
+./App -b
