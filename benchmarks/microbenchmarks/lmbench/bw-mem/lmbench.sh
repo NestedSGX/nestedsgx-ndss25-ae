@@ -11,3 +11,4 @@ for prog in "${progs[@]}"; do
     ./bw_mem -N 10000 2097152 "$prog" | grep -oP '\d+\.\d+(?= MB/SEC)' >> "$outputs"
 done
 
+make clean
