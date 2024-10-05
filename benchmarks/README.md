@@ -38,3 +38,44 @@ We support Redis/FIO with Occlum, however, this is not a easy work. We won't pro
 
 In our docker environment, please use `docker ps -a` to check the given container environment that use occlum/ubuntu20.04. You can use `docker start xxxx` and `docker exec -it xxxx /bin/bash` to start and open the terminal of the container.
 
+We will substitute the occlum with our own version, `set_occlum.sh` will automatically install our modified occlum for us.
+
+After that, we can launch our tests on FIO and Redis. 
+
+- FIO: in microbenchmarks/fio, this can be done by simply calling `./fio.sh NSGX.txt`, it might take a while, so please wait patiently.
+
+On the other hand, Redis might involve some manual work, see `README.md` in `realworldapps/redis`. You should first set up the server environment, and then in another terminal, run `./benchmarks.sh NSGX.txt` to get the timing latency we need.
+
+As a reference, We test our benchmarks in following steps.
+```shell
+# on server side. This will launch the redis server based on NestedSGX.
+./server.sh
+
+# launch another terminal for the clinet side.
+docker exec -it <CONTAINER ID> /bin/bash
+# in client directory
+./benchmarks.sh <TAG> (e.g. NSGX)
+```
+### Hotcall for FIO/REDIS
+We provide another version of Occlum and Intel-SGX-SDK to imporve the performance of FIO and Redis, however, this attempt might not be so stable, which means we might fail to run our benchmarks and NestedSGX system might crash. If crash, please reboot the guest machine. (kill the qemu process and reboot).
+```shell
+ps aux | grep qemu # Get the process id.
+kill -9 id_0, id_1 # kill the invovled process.
+```
+
+The only way you need to do is to replace occlum and intel-sgx-sdk to hotcall version, please refer to `README.md`in the root directory and download the Hotcall version.
+
+And then, repeat the last section "With Occlum" and see whether the performance of these two benchmarks is improved.
+### Manual benchmark
+We still have some bug and limitation in NestedSGX, the `tlserver` in `realworldapps/tls` is not able to launch smoothly. Even though we can get the handshake times as we expect, when all the threads exit in `pthread.join` step, this app will crash. We hope in the future we can aid this obstacle, though it is now sufficient to see the performance differences between NestedSGX and SIM mode of SGX.
+
+Please refer to the `README.md` in `tls` if you want to have a look.
+
+### Plotting:
+Happy to see you here in plotting section!! In fact, the benchmarking section of NestedSGX is to some extent too long. 
+
+However, to have a clearer look at the differences between SIM mode and NestedSGX mode performance, we still need several things to do.
+
+We will provide `plot` files in every benchmarks we provide (When comparison is highly invovled). To get the SIM mode version of performance benchmarks, shift back to the original version of Occlum, and run the above benchmarks again, remember to record all the data in another name (i.e. not the `NSGX` we used before), or this might override the data we've obtained before.
+
+When we get another version of result of benchmarks (e.g. `SIM` data), we can carefully plot the results.

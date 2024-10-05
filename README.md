@@ -72,10 +72,8 @@ After building the sgx in the container, you can then do the following steps.
 # set up the modified linux-sgx environment like step 3, make sure you've installed the sgxsdk in the path named '/opt/intel/sgxsdk/'
 source /opt/intel/sgxsdk/environment
 ```
-we use a modified `v0.29.7` version of Occlum, see following steps to override the default occlum in the docker. please use `scp` or other ways to copy occlum into your docker, then build the occlum:
-```shell
-make submodule && SGX_MODE=SIM make && make install
-```
+we use a modified `v0.29.7` version of Occlum, see following steps to override the default occlum in the docker. See `set_occlum.sh` to build the occlum, the patch `occlum-patches.patch` should be patched.
+
 after that, you can run some programs like `fio` or `redis` based on Occlum. 
 
 
