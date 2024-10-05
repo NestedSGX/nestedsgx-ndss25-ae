@@ -39,7 +39,7 @@ if [ -z "$1" ]; then
 fi
 
 if [ -z "$runs" ]; then
-    runs=6
+    runs=2
 fi
 
 if [ -z "$address" ]; then
@@ -51,15 +51,15 @@ if [ -z "$port" ]; then
 fi
 
 if [ -z "$rec_count" ]; then
-    rec_count=50000
+    rec_count=5000
 fi
 
 if [ -z "$op_count" ]; then
-    op_count=100000
+    op_count=10000
 fi
 
 if [ -z "$concurrency" ]; then
-    concurrency=20
+    concurrency=15
 fi
 
 if [ -z "$workload" ]; then
@@ -86,7 +86,7 @@ if [ -z "$YCSB_ROOT" ]; then
 fi
 
 res_dir=result-$1-$(date +%y%m%d-%H%M%S)
-targets="5000 10000 15000 20000 25000 30000 35000 40000"
+targets="500 1000 2000 4000 6000 8000 10000 12000 14000 16000"  #1000 2000 4000 6000 8000 10000 12000 14000 16000
 
 ycsb=$YCSB_ROOT/bin/ycsb.sh
 workload=$YCSB_ROOT/workloads/$workload

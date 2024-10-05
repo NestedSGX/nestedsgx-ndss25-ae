@@ -52,8 +52,23 @@ When the above 3 steps done, you can run all of the SampleCode of SGX that can b
 Occlum relys on the docker environment provided by Ant Group, **please first make sure you have successfuly insmod the Guest Module in last step,** then, set up the environment like following:
 ```python
 # pull and run the image that support the occlum.
-docker run -it --privileged -v /dev/vmpl_sgx_driver:[your_rootpath_of_image_in_the_guestOS] occlum/occlum:0.29.7-ubuntu20.04
+docker run -it --privileged -v /dev/vmpl_sgx_driver:/dev/vmpl_sgx_driver -v [your_rootpath_of_image_in_the_guestOS]:/root occlum/occlum:0.29.7-ubuntu20.04
+```
+After entering the container environment, the first time you should recompile the linux sgx sdk, or the project can't be built simply by applying `source /opt/intel/sgxsdk/environment`. Build sgx-sdk like following:
+```
+apt-get install libssl-dev libcurl4-openssl-dev protobuf-compiler libprotobuf-dev debhelper cmake reprepro unzip pkgconf libboost-dev libboost-system-dev libboost-thread-dev lsb-release libsystemd0
 
+git clone https://github.com/intel/linux-sgx.git
+cd linux-sgx && make preparation
+
+cp external/toolset/ubuntu20.04/* /usr/local/bin
+
+make sdk && make sdk_install_pkg_no_mitigation
+
+## etc.. Please refer to linux-sgx proj.
+```
+After building the sgx in the container, you can then do the following steps.
+```
 # set up the modified linux-sgx environment like step 3, make sure you've installed the sgxsdk in the path named '/opt/intel/sgxsdk/'
 source /opt/intel/sgxsdk/environment
 ```

@@ -11,13 +11,13 @@ file="Enclave/Core-Library/config.h"
 
 outputs="$1"
 
-for i in "{!NLOOKUPS[@]}"; do
-    for j in "{!HTSIZE[@]}"; do
+for i in "${!NLOOKUPS[@]}"; do
+    for j in "${!HTSIZE[@]}"; do
         nlookup="${NLOOKUPS[$i]}"
         htsize="${HTSIZE[$j]}"
 
-        sed -i "s/^#define $Macro_HTSIZE .*/#define $Macro_HTSIZE $nlookup/" $file
-        sed -i "s/^#define $Macro_HTSIZE .*/#define $Macro_HTSIZE $nlookup/" $file
+        sed -i "s/^#define $Macro_HTSIZE .*/#define $Macro_HTSIZE $htsize/" $file
+        sed -i "s/^#define $Macro_NLOOKUPS .*/#define $Macro_NLOOKUPS $nlookup/" $file
         SGX_MODE=SIM make
         ./app 2>&1 | grep -oP '\d+(?= us)' >> "$outputs"
         make clean

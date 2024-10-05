@@ -7,6 +7,8 @@ cd IDE/LINUX-SGX
 echo "build the static library"
 ./build.sh
 
-cd ../../wolfssl-examples/SGX_Linux
+cd ../../../wolfssl-examples/SGX_Linux
 ./build.sh ../../wolfssl-5.7.0-stable/
 ./App -b > $outputs
+
+make SGX_MODE=SIM clean WOLFSSL_ROOT=../../wolfssl-5.7.0-stable/

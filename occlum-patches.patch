@@ -1,0 +1,68 @@
+From 501f4f1af9f643ef038441f416a0c7a0d9f8d91e Mon Sep 17 00:00:00 2001
+From: Unik-lif <songlinke18@mails.ucas.ac.cn>
+Date: Sun, 31 Mar 2024 15:35:14 +0800
+Subject: [PATCH] update patches
+
+---
+ src/libos/src/process/task/task_x86-64.S     | 2 +-
+ src/libos/src/syscall/arch_prctl_x86-64.S    | 4 ++--
+ src/libos/src/syscall/syscall_entry_x86-64.S | 4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/src/libos/src/process/task/task_x86-64.S b/src/libos/src/process/task/task_x86-64.S
+index c794801f..07dbf994 100644
+--- a/src/libos/src/process/task/task_x86-64.S
++++ b/src/libos/src/process/task/task_x86-64.S
+@@ -38,7 +38,7 @@ __exec_task:
+     // break GDB (ptrace can't get right value if WRFSBASE is called which
+     // will make debugger fail in simulation mode). Thus we read/write FS base via
+     // arch_prctl system call.
+-#if SGX_MODE_SIM
++#if SGX_MODE_HW
+     pushq %rdi
+     pushq %rsi
+     movq %rdi, %r10
+diff --git a/src/libos/src/syscall/arch_prctl_x86-64.S b/src/libos/src/syscall/arch_prctl_x86-64.S
+index 1ad49ecd..fe81668b 100644
+--- a/src/libos/src/syscall/arch_prctl_x86-64.S
++++ b/src/libos/src/syscall/arch_prctl_x86-64.S
+@@ -1,6 +1,6 @@
+ # In SGX simulation mode, we don't use wrfsbase directly. Instead, we use arch_prctl syscall.
+ 
+-#if SGX_MODE_SIM
++#if SGX_MODE_HW
+ 
+ #define __ASSEMBLY__
+ #include "task.h"
+@@ -29,4 +29,4 @@ __arch_prctl:
+ __syscall_error: // This should never happen
+     ud2
+ 
+-#endif // SGX_MODE_SIM
+\ No newline at end of file
++#endif // SGX_MODE_SIM
+diff --git a/src/libos/src/syscall/syscall_entry_x86-64.S b/src/libos/src/syscall/syscall_entry_x86-64.S
+index e0e09720..650a71b5 100644
+--- a/src/libos/src/syscall/syscall_entry_x86-64.S
++++ b/src/libos/src/syscall/syscall_entry_x86-64.S
+@@ -79,7 +79,7 @@ __occlum_syscall_linux_abi:
+     movq %gs:(TD_TASK_OFFSET), %r12
+ 
+     // Switch to the kernel TLS by setting fsbase. Different implementation for HW and SIM modes.
+-#if SGX_MODE_SIM
++#if SGX_MODE_HW
+     pushq %rdi
+     pushq %rsi
+ 
+@@ -113,7 +113,7 @@ __occlum_sysret:
+     // Get current task
+     movq %gs:(TD_TASK_OFFSET), %r12
+     // Switch to the user TLS. Different implementation for HW and SIM modes.
+-#if SGX_MODE_SIM
++#if SGX_MODE_HW
+     pushq %rdi
+ 
+     movq $ARCH_SET_FS, %rdi
+-- 
+2.34.1
+
