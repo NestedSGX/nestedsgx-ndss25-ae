@@ -78,4 +78,26 @@ However, to have a clearer look at the differences between SIM mode and NestedSG
 
 We will provide `plot` files in every benchmarks we provide (When comparison is highly invovled). To get the SIM mode version of performance benchmarks, shift back to the original version of Occlum, and run the above benchmarks again, remember to record all the data in another name (i.e. not the `NSGX` we used before), or this might override the data we've obtained before.
 
+In another default docker image, run the following instructions.
+```shell
+./micro_sim.sh SIM
+./macro_withoutocclum.sh SIM
+
+# Then run FIO/REDIS/TLS in the same way.
+
+```
+<!-- 2fec098cb3c7 for SIM and 7d0b131e4758 for NSGX -->
 When we get another version of result of benchmarks (e.g. `SIM` data), we can carefully plot the results.
+
+In every benchmark, we provide the corresponding plot python scripts, this might not run smoothly in the Guest VM, and maybe you can't directly have a look at the output `*.pdf` file as you wish, so you can use `scp` to transfer it into the Host OS, and draw the graph in the Host OS machine.
+```shell
+scp -r [your_path_to_the_nestedsgx]/benchmarks ae-ndss25@[your_host_machine_ip]:[your_path_in_the_host_machine] .
+```
+If you follow our steps above, in these benchmark dirents, you'll have `NSGX.txt` as the result of the NestedSGX version of benchmark performance, and `SIM.txt` as the result of the simulation version of benchmark performance. The `*.pdf` file for the comparsion can be obtained using the following scripts.
+```shell
+# Taking microbenchmarks/sgx-nbench/ as example
+
+python nbench.py -nsgx NSGX.txt -sim SIM.txt
+
+# This will output a file named nbench.pdf, and you can check the pdf using plug-ins in VSCODE.
+```

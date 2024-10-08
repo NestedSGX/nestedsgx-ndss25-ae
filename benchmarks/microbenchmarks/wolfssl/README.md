@@ -6,3 +6,12 @@ Two steps:
 2. in `wolfssl-examples`, build up the `App` binary and run `-b` to get the benchmarks.
 
 Make sure to run in SIM mode.
+## Plotting:
+Ensure you've gotten NSGX.txt and SIM.txt, use analysis.py to transfer it into better form.
+```
+python analysis.py NSGX.txt > nsgx.txt
+```
+Then, input them to wolfssl.py
+```
+python wolfssl.py -nsgx nsgx.txt -sim sim.txt
+```
