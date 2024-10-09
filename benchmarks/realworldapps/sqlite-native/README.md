@@ -42,3 +42,8 @@ Options:
 Arguments:
     <TAG>                   Tag of this evalutaion
 ```
+
+## Plotting:
+Please read args in `sqlite.py`, what you should pass is six files.
+
+These files will be located in `sqlite-native` dirent, in the form of "*.csv", please choose the right file for each argument.

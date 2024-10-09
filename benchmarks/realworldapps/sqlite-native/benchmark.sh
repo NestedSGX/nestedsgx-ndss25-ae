@@ -95,4 +95,4 @@ done
 
 echo ""
 echo "Summary (Throughput):"
-cat $res_dir/throughput.csv
+cat $res_dir/throughput.csv > result-$1-throught.csv
