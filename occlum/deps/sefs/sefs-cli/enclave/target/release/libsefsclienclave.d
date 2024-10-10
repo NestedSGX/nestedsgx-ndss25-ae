@@ -1,1 +1,0 @@
-/root/occlum/deps/sefs/sefs-cli/enclave/target/release/libsefsclienclave.a: /root/occlum/deps/sefs/sefs-cli/enclave/src/lang.rs /root/occlum/deps/sefs/sefs-cli/enclave/src/lib.rs /root/occlum/deps/sefs/sefs-cli/enclave/src/sgxfs.rs

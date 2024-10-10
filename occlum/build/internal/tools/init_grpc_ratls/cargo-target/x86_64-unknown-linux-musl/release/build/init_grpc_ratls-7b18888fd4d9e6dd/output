@@ -1,5 +1,0 @@
-cargo:rustc-link-search=native=/opt/occlum/toolchains/dcap_lib/musl
-cargo:rustc-link-search=native=/opt/occlum/toolchains/grpc_ratls/musl
-cargo:rustc-link-lib=dylib=grpc_ratls_client
-cargo:rustc-link-lib=dylib=hw_grpc_proto
-cargo:rustc-link-lib=dylib=occlum_dcap

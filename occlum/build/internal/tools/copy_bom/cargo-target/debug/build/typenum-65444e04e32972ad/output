@@ -1,2 +1,0 @@
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/root/occlum/build/internal/tools/copy_bom/cargo-target/debug/build/typenum-65444e04e32972ad/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/root/occlum/build/internal/tools/copy_bom/cargo-target/debug/build/typenum-65444e04e32972ad/out/op.rs

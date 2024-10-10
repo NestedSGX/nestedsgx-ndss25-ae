@@ -1,9 +1,0 @@
-includes:
-  - base.yaml
-# glibc redis
-targets:
-  # copy redis
-  - target: /
-    copy:
-      - dirs:
-        - /usr/local/redis/bin

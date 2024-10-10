@@ -1,9 +1,0 @@
-includes:
-  - base.yaml
-targets:
-  # copy busybox
-  - target: /bin
-    copy:
-      - files:
-        - /opt/occlum/toolchains/busybox/glibc/busybox
-

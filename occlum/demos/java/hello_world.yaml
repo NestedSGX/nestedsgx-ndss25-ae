@@ -1,9 +1,0 @@
-includes:
-  - base.yaml
-  - java-11-alibaba-dragonwell.yaml
-targets:
-  # copy java class file
-  - target: /
-    copy:
-      - files:
-        - ../hello_world/Main.class

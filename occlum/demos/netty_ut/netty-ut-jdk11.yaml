@@ -1,9 +1,0 @@
-includes: 
-  - base.yaml
-  - java-11-openjdk-amd64.yaml
-targets: 
-  # copy sofaboot jar
-  - target: /usr/lib
-    copy: 
-      - dirs:
-          - ../netty

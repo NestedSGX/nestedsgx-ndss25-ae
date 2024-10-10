@@ -1,9 +1,0 @@
-includes:
-  - base.yaml
-targets:
-  - target: /
-    copy:
-      - dirs:
-        - ../tensorflow_src/tensorflow/lite/tools/make/gen/linux_x86_64/bin
-        - ../models
-        - ../tensorflow_src/tensorflow/lite/examples/label_image/testdata

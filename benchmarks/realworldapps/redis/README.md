@@ -17,3 +17,10 @@ YCSB_ROOT=../tools/ycsb-redis-binding-0.17.0 ./benchmark.sh <tag>
 ```
 
 The result will shows in the `client`. You should fetch and record the result `.csv` file. This will be used in plotting process. You can run client.sh for simplicity.
+
+## Simpler Steps
+First run `./setup.sh`
+
+Then run `./redis.sh $outputs` will be OK.
+## Ploting
+See `redis.py` for more details. notice: for -nsgx or -sim, add two `.csv` files, one is `throughoutput.csv`, the other is `latency.csv`
