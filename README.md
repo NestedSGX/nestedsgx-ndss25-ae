@@ -82,7 +82,7 @@ We use several benchmarks to measure the performance:
 - microbenchmarks: as described in our paper. 4 kinds of Micro-benchmarks are involved.
 - Real world applications: as described in our paper. 4 kinds of real apps are involved.
 
-Please refer to the `benchmarks` for more details.
+Please refer to the `benchmarks` for more details. We've provided ample tests and docs for you to have a try!!
 
 ### HotCall: Acceleration
 To accelerate the speed of Apps supported by Occlum, we provide another version of sdk based on [`HotCall(ISCA' 2017)`](https://github.com/oweisse/hot-calls.git), **this will be included in `hotcall`**. This can be in-cooperated with another version of the Occlum, which is also acclerated.

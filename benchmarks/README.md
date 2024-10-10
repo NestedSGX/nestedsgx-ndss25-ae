@@ -7,7 +7,19 @@ We encapsulate the Benchmarks with several different scripts, however as you fet
 find "." -name "*.sh" -exec chmod +x {} \;
 ```
 ### Microbenchmarks without Occlum
-Several microbenchmarks can be run so long as you have intel-sgx environment correctly installed. Make sure you've installed it in `/opt/intel/sgxsdk` beforehand. When finished, you can run `micro_withoutocclum.sh`, which includes the following benchmarks.
+Several microbenchmarks can be run so long as you have intel-sgx environment correctly installed. Make sure you've installed it in `/opt/intel/sgxsdk` beforehand. 
+
+To make it easier, some tips are mentioned below:
+```shell
+# download linux-sgx, follow the steps in linux-sgx to download necessary software in your environment, run make preparation
+make clean && make sdk_install_pkg_no_mitigation` to get the `binary` setup package.
+
+# after that you can get this binary in linux/installer/bin/
+./sgx_linux_x64_sdk_2.20.100.4.bin 
+
+# to install sgx-sdk, make sure you always install it in `/opt/intel`, after that, use `source /opt/intel/sgxsdk/environment` to apply it in the OS.
+```
+When finished, you can run `micro_withoutocclum.sh`, which includes the following benchmarks.
 - Leaf instructions of Intel SGX: which demostrates the performance of SGX leaf instructions. (Leaf)
 - Edge Call: which measures the time to switch world between the APP and Enclave. (microbenchmarks/ecall_ocall)
 - Lmbench: evaluate the memory bandwidth. (microbenchmarks/lmbench)
