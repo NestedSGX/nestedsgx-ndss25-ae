@@ -12,8 +12,19 @@ on Server side, run `./app`
 
 on Client side, run `./tls-perf -t <thread numbers> 127.0.0.1 4433`
 
-Record the Handshake times per second manually, and then draw graphs in `tls.py`, please change the value of the following two parameters before drawing the graph.
+Record the Handshake times per second manually, and then draw graphs in `tls.py`. `tls.py` receives data type like following: e.g. tlsbaseline.txt might look like below.
 ```
-bw_sim_lookup_250
-bw_nsgx_lookup_250
+1:689
+2:703
+5:708
+10:734
+20:724
+30:714
+40:723
+50:705
 ```
+Use this plotting scripts like following:
+```shell
+python new_tls.py -tb tlsbaseline.txt -tn tlsnested.txt
+```
+Where the first parameter is the thread number, and the second is the handshake times per second.

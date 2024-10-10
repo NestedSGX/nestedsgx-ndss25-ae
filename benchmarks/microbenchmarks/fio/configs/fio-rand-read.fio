@@ -4,7 +4,7 @@
 name=fio-rand-read
 filename=/root/fio-rand-read
 rw=randread
-bs=4K
+bs=256K
 direct=0
 numjobs=1
 time_based

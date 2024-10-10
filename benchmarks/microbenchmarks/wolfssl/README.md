@@ -6,6 +6,10 @@ Two steps:
 2. in `wolfssl-examples`, build up the `App` binary and run `-b` to get the benchmarks.
 
 Make sure to run in SIM mode.
+
+## Notice:
+Make sure you've set up git.username and git.emailaddress beforehand, or the `./build.sh` might not able to apply the patch we provide.
+
 ## Plotting:
 Ensure you've gotten NSGX.txt and SIM.txt, use analysis.py to transfer it into better form.
 ```
