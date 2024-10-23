@@ -1,4 +1,5 @@
 ## NestedSGX
+**News: NestedSGX is accepted by NDSS'25, Congrats for all of our co-operators!**
 NestedSGX is a Framework utilizing AMD SEV-SNP features to simulate SGX with fair security ensurance and compatibility.
 
 **For security**: We co-operate the threat model of SGX and SEV-SNP, the enclave distrusts the Guest OS and the Hypervisor.
