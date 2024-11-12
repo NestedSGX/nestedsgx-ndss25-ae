@@ -9,15 +9,6 @@ NestedSGX is a Framework utilizing AMD SEV-SNP features to simulate SGX with fai
 
 NestedSGX is developed based on [`Linux-svsm`](https://github.com/AMDESE/linux-svsm), many thanks to the developers in AMD!
 
-For more details, please refer to our paper.
-```C
-@article{wang2024nestedsgx,
-  title={The Road to Trust: Building Enclaves within Confidential VMs},
-  author={Wang, Wenhao and Song, Linke and Mei, Benshan and Liu, Shuang and Zhao, Shijun and Yan, Shoumeng and Wang, XiaoFeng and Meng, Dan and Hou, Rui},
-  journal={arXiv preprint arXiv:2402.11438},
-  year={2024}
-}
-```
 
 ### Preparation for NestedSGX:
 Please build the [`Linux-svsm environment`](https://github.com/AMDESE/linux-svsm) first, to reproduce, your machine should support SEV-SNP features. After building the environment according to `linux-svsm`, what you have in current machine will be: (`vx` represents the newest svsm version of [linux branch](https://github.com/AMDESE/linux))
