@@ -129,7 +129,7 @@ If your `[mode]` is `sim`, please choose `micro_sim.sh` instead.
 
 To compare the results with SIM mode of SGX, we provide another version of benchmarks, named `micro_sim.sh`.
 ```
-./micro_sim.sh sim.txt
+./micro_sim.sh SIM.txt
 ```
 #### Macrobenchmarks without Occlum
 Serveral other macrobenchmarks can be obtained automatically through `macro_withoutocclum.sh`.
