@@ -120,7 +120,7 @@ If your `[mode]` is `nsgx`, you can run `micro_withoutocclum.sh`, which includes
 
 To plot the graph later, results of the last three benchmarks should be kept in Files. 
 ```
-./micro_withoutocclum.sh nsgx.txt
+./micro_withoutocclum.sh NSGX.txt
 ```
 Which will automatically store the result of Lmbench, sgx-nbench, wolfssl in `nsgx.txt` in their own directory. 
 
