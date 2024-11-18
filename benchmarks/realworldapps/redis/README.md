@@ -9,7 +9,7 @@ SGX_MODE=SIM ./prepare.sh
 SGX_MODE=SIM ./build.sh
 SGX_MODE=SIM ./run.sh
 ```
-You can run `./server.sh` as a simple way.
+You can run `./server.sh` as a simple way, which contains the commands above.
 
 - In another terminal, in `client`, run `benchmark.sh` with prefix `YCSB_ROOT=../tools/ycsb-redis-binding-0.17.0`
 ```

@@ -12,7 +12,7 @@ Several microbenchmarks can be run so long as you have intel-sgx environment cor
 To make it easier, some tips are mentioned below:
 ```shell
 # download linux-sgx, follow the steps in linux-sgx to download necessary software in your environment, run make preparation
-make clean && make sdk_install_pkg_no_mitigation` to get the `binary` setup package.
+make clean && make sdk_install_pkg_no_mitigation` # to get the `binary` setup package.
 
 # after that you can get this binary in linux/installer/bin/
 ./sgx_linux_x64_sdk_2.20.100.4.bin 
@@ -90,7 +90,7 @@ However, to have a clearer look at the differences between SIM mode and NestedSG
 
 We will provide `plot` files in every benchmarks we provide (When comparison is highly invovled). To get the SIM mode version of performance benchmarks, shift back to the original version of Occlum, and run the above benchmarks again, remember to record all the data in another name (i.e. not the `NSGX` we used before), or this might override the data we've obtained before.
 
-In another default docker image, run the following instructions.
+In the docker image, run the following instructions.
 ```shell
 ./micro_sim.sh SIM
 ./macro_withoutocclum.sh SIM
