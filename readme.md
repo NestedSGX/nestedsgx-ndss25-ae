@@ -5,7 +5,7 @@ We are sorry the different README.md files have caused your confusion, so we dec
 ```
 sudo ./launch-qemu.sh -hda ae.qcow2 -sev-snp -svsm svsm.bin
 ```
-That way you can start the Guest VM. However, the display of the default Guest VM might be too small (i.e. 640 x 480), so if you better your use experience. We recommend you try to access the Guest VM using SSH.
+That way you can start the Guest VM. However, the display of the default Guest VM might be too small (i.e. 640 x 480), so if you want to better your use experience. We recommend you try to access the Guest VM using SSH.
 ```
 ssh -p 30001 ae-ndss@localhost
 ```
@@ -21,7 +21,7 @@ Three version of components are provided.
 - sim: the Simulation version (We choose it as the Baseline).
 - Hotcall: the accelerated NestedSGX version using Hotcall methods (ISCA'2017)
 
-For simply denote the mode you want to run as `[mode]` in the following steps.
+For simplicity, we denote the mode you want to run as `[mode]` in the following steps.
 
 If you want to choose `sim` as the `[mode]`, that means the benchmarks don't rely on the Guest Kernel Module, please jump to **Step 4**.
 
