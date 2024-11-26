@@ -1,32 +1,9 @@
-## NestedSGX
-**News: NestedSGX is accepted by NDSS'25, Congrats for all of our co-operators!**
+## A step-by-step README
+We are sorry the different README.md files have caused your confusion, so we decide to write another one for you.
 
-NestedSGX is a Framework utilizing AMD SEV-SNP features to simulate SGX with fair security ensurance and compatibility.
-
-**For security**: We co-operate the threat model of SGX and SEV-SNP, the enclave distrusts the Guest OS and the Hypervisor.
-
-**For compatibility**: Our NestedSGX can smoothly lanuch the LibOS based on SGX named [Occlum](https://github.com/occlum/occlum), therefore some large programs like `redis` and `lighttpd` can be easily ported to `SGX-like` form and successfully operate in a more secure environment.
-
-NestedSGX is developed based on [`Linux-svsm`](https://github.com/AMDESE/linux-svsm), many thanks to the developers in AMD!
-
-
-### Preparation for NestedSGX:
-Please build the [`Linux-svsm environment`](https://github.com/AMDESE/linux-svsm) first, to reproduce, your machine should support SEV-SNP features. After building the environment according to `linux-svsm`, what you have in current machine will be: (`vx` represents the newest svsm version of [linux branch](https://github.com/AMDESE/linux))
-1. Host Machine: `svsm-preview-vx-host` version of linux.
-2. Guest Machine: `svsm-preview-vx-guest` version of linux.
-3. Qemu: corresponding version of the linux.
-4. omvf: corresponding version of the linux.
-5. svsm: original version of SVSM.
-
-The above five components can be automatically downloaded and established by running `./build.sh --package` in `linux-svsm` project. Please refer to the initial project for more information and guidance. Besides, to run `Occlum` and `Intel SGX-SDK`, we prefer you to have at least `60 GB` space in your qemu hardware disk, or it might be not sufficient to support `Redis` and other `apps` based on `Occlum`.
-
-NestedSGX is built based on `linux-svsm` project, below are some changes to make NestedSGX accessible. 
-
-### Steps:
 ### Step 1: Entering the Guest OS
-We assume the driver is ae.qcow2, and the client is ae-ndss.
 ```
-sudo ./launch-qemu.sh -hda guest.qcow2 -sev-snp -svsm svsm.bin
+sudo ./launch-qemu.sh -hda ae.qcow2 -sev-snp -svsm svsm.bin
 ```
 That way you can start the Guest VM. However, the display of the default Guest VM might be too small (i.e. 640 x 480), so if you want to better your use experience. We recommend you try to access the Guest VM using SSH.
 ```
@@ -37,28 +14,12 @@ ssh -p 30001 ae-ndss@localhost
 sudo su
 ```
 ### Step 2: Choose what mode you want to run
-To compare the performance of NestedSGX, we will use three different version of components in the Guest OS.
+To compare the performance of NestedSGX, we pre-downloaded the different version of components in the Guest OS, which can be found in `components` directory.
 
-Please first download all of them in a directory for convenience.
-```
-mkdir components && cd components
-mkdir nsgx
-mkdir sim
-mkdir Hotcall
-```
-
-Three types of components we will use.
-- nsgx: The NestedSGX version. Provide in this repo, please first use following scripts to get the modified version of occlum for nsgx. Then, copy `linux-sgx` in this repo and the above `occlum` in `components/sim` directory.
-```
-# download the 0.29.7 version of occlum
-git clone -b 0.29.7 https://github.com/occlum/occlum.git
-
-# patch the occlum with the patches.
-cd occlum
-git am ../occlum-patches.patch
-```
-- sim: The Simulation version (We choose it as the Baseline). Please download from Occlum project. Links are shown below: [linux-sgx](https://github.com/occlum/linux-sgx.git) and [occlum](https://github.com/occlum/occlum.git). We use `v0.29.7`version of occlum, so please download and install this version. For the `linux-sgx`, please select `sgx_2.20_for_occlum` branch.
-- Hotcall: The accelerated NestedSGX version using Hotcall methods (ISCA'2017). This is given in another [repo](https://github.com/NestedSGX/Hotcall.git). We use this version simply for the acceleration of `fio` and `redis` benchmarks.
+Three version of components are provided.
+- nsgx: the NestedSGX version.
+- sim: the Simulation version (We choose it as the Baseline).
+- Hotcall: the accelerated NestedSGX version using Hotcall methods (ISCA'2017)
 
 For simplicity, we denote the mode you want to run as `[mode]` in the following steps.
 
@@ -200,12 +161,6 @@ The environment to run `redis` and `fio` is established in the docker image, wit
 
 So to run `redis` and `fio`, we should first enter the docker image, and prepare the corresponding environment to run benchmarks in our `[mode]` mode.
 ```
-# Prepare yourself the docker image fit for the NestedSGX.
-docker pull occlum/occlum:0.29.7-ubuntu20.04
-
-# start the docker with awareness of the svsm-guest
-docker run -it --privileged -v /dev/vmpl_sgx_driver:/dev/vmpl_sgx_driver -v /home/link/occlum:/root occlum/occlum:0.29.7-ubuntu20.04
-
 docker ps -a <image_id>         # Find the docker image ID.
 docker start -ai <image_id>     # Start the docker image with <image_id> ID.
 
@@ -213,7 +168,7 @@ docker start -ai <image_id>     # Start the docker image with <image_id> ID.
 docker exec -it /bin/bash       # enter the docker image in another terminal. Helpful if you are using tmux.
 ```
 ### Step 9: Set up LINUX-SGX-SDK in the docker image
-Please enter `components/[mode]` directory, choose the one directory named `linux-sgx`. The differences are the toolchains in the docker image to build the SDK, so we have to do it in the docker image.
+Please enter `components/[mode]` directory, choose the one directory named `occlum-linux-sgx`. The `occlum-linux-sgx` is a little different from the one we use in the Guest OS, and is in corresponding to the `occlum` we use in the docker image. And the other differences are the toolchains in the docker image to build the SDK.
 ```
 cd components/[mode]/occlum-linux-sgx
 ```
@@ -244,7 +199,7 @@ This will automatically install the new occlum in the environment. And the newer
 ### Step 11: Run `fio`
 You can now run `micro_withocclum.sh` to run `fio`, like below: taking `[mode]` as `nsgx` for example.
 ```
-./micro_withocclum.sh NSGX.txt
+/micro_withocclum.sh NSGX.txt
 ```
 The result will be automatically stored in `fio`.
 
@@ -286,7 +241,8 @@ After plotting some graphs, you might need first to use `scp` to download the re
 ### A3: Yes you can! But the performance results you get might be a little different since docker has some restrictions on the resources that the OS can utilize.
 
 ### Q4: This time, I accidently come across the `User App: IOCTL failed` problems, how can I mitigate this?
-
 ### A4: You might forget to install the Guest Kernel Module first. I recommend you first reboot the Guest OS, install the Kernel Module first, and then do the following things. BTW, if you come across this problem in the docker image, we are sorry that installing the Kernel Module after entering the Docker Image won't help aid this problem because the docker image is set up at the hypothesis that a `misc_device` named `/dev/vmpl-driver` is established before, which is set up by the Guest Kernel Module.
 
-# 
+
+## Miscs:
+Thank you for your great patience! We appreciate your supports a lot!
