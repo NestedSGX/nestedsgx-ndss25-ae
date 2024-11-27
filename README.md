@@ -29,7 +29,12 @@ Please build the [`Linux-svsm environment`](https://github.com/AMDESE/linux-svsm
 The above five components can be automatically downloaded and established by running `./build.sh --package` in `linux-svsm` project. Please refer to the initial project for more information and guidance. Besides, to run `Occlum` and `Intel SGX-SDK`, we prefer you to have at least `60 GB` space in your qemu hardware disk, or it might be not sufficient to support `Redis` and other `apps` based on `Occlum`.
 
 NestedSGX is built based on `linux-svsm` project, below are some changes to make NestedSGX accessible. 
-
+### Structure
+```
+benchmarks: benchmarks we will run
+linux-sgx: NestedSGX version of linux-sgx-sdk
+svsm-guest-occlum: Kernel Module we will use to support NestedSGX
+```
 ### Steps:
 ### Step 1: Entering the Guest OS
 We assume the driver is ae.qcow2, and the client is ae-ndss.
