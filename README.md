@@ -29,17 +29,53 @@ Please build the [`Linux-svsm environment`](https://github.com/AMDESE/linux-svsm
 The above five components can be automatically downloaded and established by running `./build.sh --package` in `linux-svsm` project. Please refer to the initial project for more information and guidance. Besides, to run `Occlum` and `Intel SGX-SDK`, we prefer you to have at least `60 GB` space in your qemu hardware disk, or it might be not sufficient to support `Redis` and other `apps` based on `Occlum`.
 
 NestedSGX is built based on `linux-svsm` project, below are some changes to make NestedSGX accessible. 
+
+### How the Project is organized? How does it work?
+Overview is given below: An entire process of User App (i.e. Apps calling linux-sgx, Occlum LibOS) to run sth in the Enclave (which is in VMPL0 Ring3), and return back to the App is given below.
+``` 
+               Ring 0                        Ring 3
+
+         -------------------  sysretq  ------------------           
+         |   SVSM Monitor  | --------> |                |
+VMPL0    |                 |           |    Enclave     |
+         | (i.e. svsm.bin) | <-------- |                |
+         -------------------  syscall  ------------------
+              |      ^
+              |      | Switch VMPL
+              >      |
+         -------------------           -------------------
+         |     Guest OS    |   ioctl   |    User App     |
+VMPL1    |  Kernel Module  | <-------- |   (i.e. Apps    |
+         |(i.e. svsm-guest-|           |   calling SDK,  |
+         |     occlum)     | --------> |   Occlum LibOS) |
+         -------------------           -------------------
+```
+To see Better demostration, please refer to our paper.
+
+We provide necessary components to support this process, please refer to Section `Structure` below for detailed info of these components.
+
 ### Structure
 ```
 benchmarks: benchmarks we will run
 linux-sgx: NestedSGX version of linux-sgx-sdk
 svsm-guest-occlum: Kernel Module we will use to support NestedSGX
+ae-doc: Docs for AE
+occlum-patches.patch: Patch for NestedSGX version of occlum
+svsm.bin: Monitor of the NestedSGX
 ```
+
+### How to setup a minimal working example?
+In the following Section `Steps`, we provide verbose docs on how to run NestedSGX step-by-step. However, you can simply setup a minimal working example first.
+
+To simply go through the process shown in Section `How the Project is organized? How does it work?` above, building `Occlum` is not a Must, here are some instructions on how to build a minimal working example for NestedSGX.
+- Choose the mode `nsgx`, install the kernel Module in the Guest OS. (Start from `Step 1` to `Step 3`)
+- Install SDK: `linux-sgx`. (See `Step 5`)
+- Run some initial benchmarks. (See `Step 6`)
 ### Steps:
 ### Step 1: Entering the Guest OS
 We assume the driver is ae.qcow2, and the client is ae-ndss.
 ```
-sudo ./launch-qemu.sh -hda guest.qcow2 -sev-snp -svsm svsm.bin
+sudo ./launch-qemu.sh -hda ae.qcow2 -sev-snp -svsm svsm.bin
 ```
 That way you can start the Guest VM. However, the display of the default Guest VM might be too small (i.e. 640 x 480), so if you want to better your use experience. We recommend you try to access the Guest VM using SSH.
 ```
