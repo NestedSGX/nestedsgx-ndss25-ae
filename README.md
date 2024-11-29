@@ -329,7 +329,7 @@ After plotting some graphs, you might need first to use `scp` to download the re
 ### A1: Please enter the `components/nsgx`, and reinstall `linux-sgx` like **Step 5**.
 
 ### Q2: In the docker Image, how can I shift my `[mode]` from `sim` to `nsgx`?
-### A1: Please enter the `components/nsgx`, and reinstall `occlum-linux-sgx` like **Step 9** and `occlum` like **Step 10**.
+### A1: Please enter the `components/nsgx`, and reinstall `linux-sgx` like **Step 9** and `occlum` like **Step 10**.
 
 ### Q3: Can I run scripts like `micro_withoutocclum.sh` in the docker image instead of in the Guest OS?
 ### A3: Yes you can! But the performance results you get might be a little different since docker has some restrictions on the resources that the OS can utilize.
